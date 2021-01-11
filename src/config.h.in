@@ -1,0 +1,5 @@
+#define visutiles_VERSION_MAJOR @visutiles_VERSION_MAJOR @
+#define visutiles_VERSION_MINOR @visutiles_VERSION_MINOR @
+#define visutiles_PROG_NAME "@visutiles_PROG_NAME@"
+#define visutiles_PROG_NAME_EXEC "@visutiles_PROG_NAME_EXEC@"
+#define TARGET_FPS 30
