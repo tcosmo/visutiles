@@ -1,7 +1,8 @@
 #include "graphic_engine.h"
 
-GraphicEngine::GraphicEngine(World &world, int screen_w, int screen_h)
-    : world(world) {
+GraphicEngine::GraphicEngine(WorldController& world_controller,
+                             WorldView& world_view, int screen_w, int screen_h)
+    : world_controller(world_controller), world_view(world_view) {
   window.create(sf::VideoMode(screen_w, screen_h), visutiles_PROG_NAME);
   window.setFramerateLimit(TARGET_FPS);
 

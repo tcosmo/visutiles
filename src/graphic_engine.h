@@ -5,17 +5,20 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
-#include "world.h"
+#include "world_controller.h"
+#include "world_view.h"
 
 class GraphicEngine {
  public:
-  GraphicEngine(World &world, int screen_w, int screen_h);
+  GraphicEngine(WorldController& world_controller, WorldView& world_view,
+                int screen_w, int screen_h);
   ~GraphicEngine();
 
   void run();
 
  private:
-  World &world;
+  WorldController& world_controller;
+  WorldView& world_view;
 
   sf::RenderWindow window;
 

@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-O3")
 
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES "src/*.cpp" "src/third_party/tinyxml/tinyxml2.cpp")
 
 set(EXECUTABLE_NAME "visutiles")
 add_executable(visutiles ${SOURCES})
@@ -29,8 +29,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 find_package(SFML 2 REQUIRED network audio graphics window system)
 if(SFML_FOUND)
   include_directories(${SFML_INCLUDE_DIR})
-  target_link_libraries(${EXECUTABLE_NAME} ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
+  target_link_libraries(${EXECUTABLE_NAME}  ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 endif()
+
 
 # Install target
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
