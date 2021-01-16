@@ -1,27 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.4" tiledversion="1.4.3" name="CollatzTileset" tilewidth="271" tileheight="273" tilecount="6" columns="0">
- <grid orientation="orthogonal" width="1" height="1"/>
+<tileset version="1.4" tiledversion="1.4.3" name="CollatzTileset2" tilewidth="271" tileheight="273" tilecount="6" columns="6">
  <properties>
-  <property name="rotation" type="float" value="0.25"/>
+  <property name="rotation" type="float" value="45"/>
  </properties>
- <tile id="0" type="COLLATZ_TILE_0">
-  <image width="271" height="273" source="CollatzTile0.png"/>
- </tile>
- <tile id="1" type="COLLATZ_TILE_1">
-  <image width="271" height="273" source="CollatzTile1.png"/>
- </tile>
- <tile id="2" type="COLLATZ_TILE_2">
-  <image width="271" height="273" source="CollatzTile2.png"/>
- </tile>
- <tile id="3" type="COLLATZ_TILE_3">
-  <image width="271" height="273" source="CollatzTile3.png"/>
- </tile>
- <tile id="4" type="COLLATZ_TILE_4">
-  <image width="271" height="273" source="CollatzTile4.png"/>
- </tile>
- <tile id="5" type="COLLATZ_TILE_5">
-  <image width="271" height="273" source="CollatzTile5.png"/>
- </tile>
+ <image source="CollatzTileset.png" width="1626" height="273"/>
+ <tile id="0" type="COLLATZ_TILE_0"/>
+ <tile id="1" type="COLLATZ_TILE_1"/>
+ <tile id="2" type="COLLATZ_TILE_2"/>
+ <tile id="3" type="COLLATZ_TILE_3"/>
+ <tile id="4" type="COLLATZ_TILE_4"/>
+ <tile id="5" type="COLLATZ_TILE_5"/>
  <wangsets>
   <wangset name="WangCollatz" tile="-1">
    <wangedgecolor name="0,3" color="#ff0000" tile="-1" probability="1"/>

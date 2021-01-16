@@ -14,7 +14,7 @@ class World {
   ~World();
 
   /* Attributes */
-  std::map<sf::Vector2i, const Tile&, CompareTilesPositions> tile_at_pos;
+  std::map<sf::Vector2i, TileId, CompareTilesPositions> tile_at_pos;
 
   const Tileset& tileset;
 

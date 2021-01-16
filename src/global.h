@@ -26,17 +26,23 @@
               __VA_ARGS__);                                                 \
   } while (0)
 
-#define error_log(fmt, ...)                                               \
-  do {                                                                    \
-    fprintf(stderr, "%s:%d:%s(): " fmt, __FILENAME__, __LINE__, __func__, \
-            __VA_ARGS__);                                                 \
+#define warning_log(fmt, ...)                                           \
+  do {                                                                  \
+    fprintf(stdout, "WARNING %s:%d:%s(): " fmt, __FILENAME__, __LINE__, \
+            __func__, __VA_ARGS__);                                     \
   } while (0)
 
-#define fatal_error_log(fmt, ...)                                         \
-  do {                                                                    \
-    fprintf(stderr, "%s:%d:%s(): " fmt, __FILENAME__, __LINE__, __func__, \
-            __VA_ARGS__);                                                 \
-    exit(1);                                                              \
+#define error_log(fmt, ...)                                           \
+  do {                                                                \
+    fprintf(stderr, "ERROR %s:%d:%s(): " fmt, __FILENAME__, __LINE__, \
+            __func__, __VA_ARGS__);                                   \
+  } while (0)
+
+#define fatal_error_log(fmt, ...)                                     \
+  do {                                                                \
+    fprintf(stderr, "FATAL %s:%d:%s(): " fmt, __FILENAME__, __LINE__, \
+            __func__, __VA_ARGS__);                                   \
+    exit(1);                                                          \
   } while (0)
 
 struct CompareTilesPositions {

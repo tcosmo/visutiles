@@ -2,31 +2,30 @@
 
 Tileset::Tileset(std::string tsx_file_dir, std::string tsx_filename)
     : tsx_file_dir(tsx_file_dir), tsx_filename(tsx_filename) {
+  rotation = 0.0;
   parse_tsx_file();
 }
 
 Tileset::~Tileset() {}
 
 void Tileset::tsx_extract_tiles(tinyxml2::XMLElement* root) {
+  for (TileId t_id = 0; t_id < tile_count; t_id += 1) {
+    Tile new_tile;
+    new_tile.id = t_id;
+    tiles[new_tile.id] = new_tile;
+  }
+
   for (tinyxml2::XMLElement* tile_elem = root->FirstChildElement("tile");
        tile_elem != NULL; tile_elem = tile_elem->NextSiblingElement("tile")) {
-    Tile new_tile;
-    new_tile.id = std::stoi(tile_elem->Attribute("id"));
-    new_tile.type = tile_elem->Attribute("type");
-
-    tinyxml2::XMLElement* image_elem = tile_elem->FirstChildElement("image");
-    new_tile.skin_width = std::stoi(image_elem->Attribute("width"));
-    new_tile.skin_height = std::stoi(image_elem->Attribute("height"));
-    new_tile.skin_filename = image_elem->Attribute("source");
-
-    tiles[new_tile.id] = new_tile;
+    TileId t_id = std::stoi(tile_elem->Attribute("id"));
+    tiles[t_id].type = tile_elem->Attribute("type");
   }
 }
 
 void Tileset::tsx_extract_Wang_colors(tinyxml2::XMLElement* root) {
   tinyxml2::XMLElement* wangsets = root->FirstChildElement("wangsets");
   if (!wangsets) {
-    fatal_error_log("FATAL: no wangset defined in `%s`. Abort. \n",
+    fatal_error_log("No wangset defined in `%s`. Abort. \n",
                     tsx_file_path.c_str());
   }
 
@@ -34,16 +33,16 @@ void Tileset::tsx_extract_Wang_colors(tinyxml2::XMLElement* root) {
   for (tinyxml2::XMLElement* wangset = wangsets->FirstChildElement("wangset");
        wangset != NULL; wangset = wangset->NextSiblingElement("wangset")) {
     if (wangset_count >= 1) {
-      error_log(
-          "WARNING: multiple wangsets are defined in `%s`. Only the first one "
+      warning_log(
+          "Multiple wangsets are defined in `%s`. Only the first one "
           "is considered. \n",
           tsx_file_path.c_str());
       break;
     }
 
     if (wangset->FirstChildElement("wangcornercolor")) {
-      error_log(
-          "WARNING: a Wang corner color is defined in `%s`. Corner colors are "
+      warning_log(
+          "A Wang corner color is defined in `%s`. Corner colors are "
           "ignored in %s. \n",
           tsx_file_path.c_str(), visutiles_PROG_NAME);
     }
@@ -84,7 +83,7 @@ void Tileset::tsx_extract_Wang_colors(tinyxml2::XMLElement* root) {
   }
 
   if (wangset_count == 0) {
-    fatal_error_log("FATAL: no wangset defined in `%s`. Abort. \n",
+    fatal_error_log("No wangset defined in `%s`. Abort. \n",
                     tsx_file_path.c_str());
   }
 }
@@ -98,20 +97,44 @@ void Tileset::parse_tsx_file() {
   tinyxml2::XMLError xml_err = tsx_xml_doc.LoadFile(tsx_file_path.c_str());
 
   if (xml_err != tinyxml2::XML_SUCCESS) {
-    fatal_error_log(
-        "FATAL: cannot open tileset file `%s`. TinyXML error %d. Abort.\n",
-        tsx_file_path.c_str(), xml_err);
+    fatal_error_log("Cannot open tileset file `%s`. TinyXML error %d. Abort.\n",
+                    tsx_file_path.c_str(), xml_err);
   }
 
   tinyxml2::XMLElement* root = tsx_xml_doc.RootElement();
   if (!root) {
-    fatal_error_log(
-        "FATAL: cannot open tileset file `%s`. TinyXML error %d. Abort.\n",
-        tsx_file_path.c_str(), xml_err);
+    fatal_error_log("Cannot open tileset file `%s`. TinyXML error %d. Abort.\n",
+                    tsx_file_path.c_str(), xml_err);
   }
 
   tile_count = std::stoi(root->Attribute("tilecount"));
   tileset_name = std::string(root->Attribute("name"));
+  tile_width = std::stoi(root->Attribute("tilewidth"));
+  tile_height = std::stoi(root->Attribute("tileheight"));
+
+  // Find rotation property (if set)
+
+  if (root->FirstChildElement("properties")) {
+    for (tinyxml2::XMLElement* property = root->FirstChildElement("properties")
+                                              ->FirstChildElement("property");
+         property != NULL;
+         property = property->NextSiblingElement("property")) {
+      if (std::string(property->Attribute("name")) == "rotation") {
+        rotation = std::stof(property->Attribute("value"));
+      }
+    }
+  }
+
+  if (!root->FirstChildElement("image")) {
+    fatal_error_log("No source image is given in tilset file `%s`. Abort.\n",
+                    tsx_file_path.c_str());
+  }
+
+  tilset_skin = root->FirstChildElement("image")->Attribute("source");
+  tileset_width =
+      std::stoi(root->FirstChildElement("image")->Attribute("width"));
+  tileset_height =
+      std::stoi(root->FirstChildElement("image")->Attribute("height"));
 
   tsx_extract_tiles(root);
   assert(tile_count == tiles.size());
@@ -119,14 +142,13 @@ void Tileset::parse_tsx_file() {
   tsx_extract_Wang_colors(root);
 }
 
-std::vector<size_t> Tileset::Wang_query(
+std::vector<TileId> Tileset::Wang_query(
     std::array<WangColor, SQUARE_GRID_NEIGHBORING_SIZE> color_constraints) {
   if (memoize_queries.find(color_constraints) != memoize_queries.end())
     return memoize_queries[color_constraints];
 
-  std::vector<size_t> to_return;
+  std::vector<TileId> to_return;
 
-  uint32_t i_tile = 0;
   for (std::pair<size_t, const Tile&> id_and_tile : tiles) {
     bool tile_matches_constraints = true;
     for (int i_side = 0; i_side < SQUARE_GRID_NEIGHBORING_SIZE; i_side += 1) {
@@ -137,9 +159,8 @@ std::vector<size_t> Tileset::Wang_query(
       }
     }
     if (tile_matches_constraints) {
-      to_return.push_back(i_tile);
+      to_return.push_back(id_and_tile.first);
     }
-    i_tile += 1;
   }
 
   memoize_queries[color_constraints] = to_return;

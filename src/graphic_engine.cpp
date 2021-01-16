@@ -14,6 +14,7 @@ GraphicEngine::GraphicEngine(WorldController& world_controller,
 GraphicEngine::~GraphicEngine() {}
 
 void GraphicEngine::run() {
+  world_view.setPosition({500, 300});
   while (window.isOpen()) {
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -28,7 +29,8 @@ void GraphicEngine::run() {
       if (event.type == sf::Event::Closed) window.close();
     }
 
-    window.clear(sf::Color::Black);
+    window.clear(sf::Color(0.2 * 255, 0.2 * 255, 0.2 * 255));
+    window.draw(world_view);
     window.display();
   }
 }
