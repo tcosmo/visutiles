@@ -1,5 +1,5 @@
 #include "world.h"
 
-World::World() {}
+World::World(const Tileset& tileset) : tileset(tileset) {}
 
 World::~World() {}

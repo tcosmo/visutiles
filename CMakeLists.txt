@@ -44,6 +44,4 @@ set(CPACK_PACKAGE_VERSION_MINOR "${visutiles_VERSION_MINOR}")
 include(CPack)
 
 # Add assets
-add_custom_command(TARGET visutiles PRE_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:visutiles>/assets)
+file(COPY src/assets DESTINATION ${CMAKE_BINARY_DIR})
