@@ -15,6 +15,7 @@ GraphicEngine::~GraphicEngine() {}
 
 void GraphicEngine::run() {
   world_view.setPosition({500, 300});
+
   while (window.isOpen()) {
     sf::Event event;
     while (window.pollEvent(event)) {

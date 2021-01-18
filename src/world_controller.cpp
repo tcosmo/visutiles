@@ -11,6 +11,10 @@ void WorldController::init_world() {
   newly_added_tiles.push_back({{-1, 0}, 4});
   newly_added_tiles.push_back({{-2, 0}, 5});
 
+  for (int i = 0; i < 1400000; i += 1) {
+    newly_added_tiles.push_back({{2, i}, 5});
+  }
+
   for (const std::pair<sf::Vector2i, TileId>& pos_and_tile :
        newly_added_tiles) {
     w.tile_at_pos[pos_and_tile.first] = pos_and_tile.second;

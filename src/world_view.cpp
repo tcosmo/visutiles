@@ -6,15 +6,17 @@ WorldView::WorldView(const Tileset& tileset,
   vertices.setPrimitiveType(sf::Quads);
   load_tileset_skin();
   setRotation(tileset.rotation);
+  setScale({tileset.scale_x, tileset.scale_y});
 }
 
 void WorldView::add_tile_vertices(const sf::Vector2i& pos,
                                   const TileId& tile_id) {
   sf::Vertex quad[4];
 
-  sf::Vector2f top_left = {(float)(pos.x * 200), (float)(-1 * pos.y * 200)};
-  sf::Vector2f one_x = {200, 0};
-  sf::Vector2f one_y = {0, 200};
+  sf::Vector2f top_left = {(float)(pos.x * ((float)tileset.tile_width)),
+                           (float)(-1 * pos.y * ((float)tileset.tile_height))};
+  sf::Vector2f one_x = {(float)tileset.tile_width, 0};
+  sf::Vector2f one_y = {0, (float)tileset.tile_height};
 
   // define its 4 corners
   quad[0].position = top_left;
@@ -41,7 +43,7 @@ void WorldView::update() {
        w_controller.newly_added_tiles) {
     sf::Vector2i pos = pos_and_tile.first;
     if (position_seen.find(pos) != position_seen.end()) {
-      warning_log("Position (%d,%d) has already be drawn in the past.", pos.x,
+      warning_log("Position (%d,%d) has already be drawn in the past.\n", pos.x,
                   pos.y);
     }
     position_seen[pos] = true;

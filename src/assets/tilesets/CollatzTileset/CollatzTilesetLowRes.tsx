@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.4" tiledversion="1.4.3" name="CollatzTileset2" tilewidth="378" tileheight="378" tilecount="6" columns="6">
+<tileset version="1.4" tiledversion="1.4.3" name="CollatzTileset2" tilewidth="32" tileheight="32" tilecount="6" columns="6">
  <properties>
   <property name="rotation" type="float" value="45"/>
   <property name="scale_x" type="float" value="0.4"/>
   <property name="scale_y" type="float" value="0.4"/>
  </properties>
- <image source="CollatzTileset.png" width="2272" height="378"/>
+ <image source="CollatzTilesetLowRes.png" width="192" height="32"/>
  <tile id="0" type="COLLATZ_TILE_0"/>
  <tile id="1" type="COLLATZ_TILE_1"/>
  <tile id="2" type="COLLATZ_TILE_2"/>

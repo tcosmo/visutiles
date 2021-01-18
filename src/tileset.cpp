@@ -3,6 +3,8 @@
 Tileset::Tileset(std::string tsx_file_dir, std::string tsx_filename)
     : tsx_file_dir(tsx_file_dir), tsx_filename(tsx_filename) {
   rotation = 0.0;
+  scale_x = 1.0;
+  scale_y = 1.0;
   parse_tsx_file();
 }
 
@@ -121,6 +123,12 @@ void Tileset::parse_tsx_file() {
          property = property->NextSiblingElement("property")) {
       if (std::string(property->Attribute("name")) == "rotation") {
         rotation = std::stof(property->Attribute("value"));
+      }
+      if (std::string(property->Attribute("name")) == "scale_x") {
+        scale_x = std::stof(property->Attribute("value"));
+      }
+      if (std::string(property->Attribute("name")) == "scale_y") {
+        scale_y = std::stof(property->Attribute("value"));
       }
     }
   }

@@ -73,6 +73,8 @@ class Tileset {
   // Rotation common to all tiles. For instance 45° in the case of
   // Collatz tileset.
   float rotation;
+  float scale_x;
+  float scale_y;
 
  private:
   void parse_tsx_file();
