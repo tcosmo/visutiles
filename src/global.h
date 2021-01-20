@@ -53,11 +53,17 @@ struct CompareTilesPositions {
 };
 
 // Multiplying a vector by a scalar
-static sf::Vector2i operator*(int scalar, const sf::Vector2i &vector) {
-  sf::Vector2i toReturn = vector;
-  int sign = (scalar < 0) ? -1 : 1;
-  for (int i = 0; i < scalar; i += 1) toReturn += sign * vector;
-  return toReturn;
+template <typename T, typename U>
+static sf::Vector2<T> operator*(U scalar, const sf::Vector2<T> &vector) {
+  sf::Vector2<T> toReturn = vector;
+  return {toReturn.x * scalar, toReturn.y * scalar};
+}
+
+// Multiplying two vectors component by component
+template <typename T>
+static sf::Vector2<T> operator*(const sf::Vector2<T> &a,
+                                const sf::Vector2<T> &b) {
+  return {a.x * b.x, a.y * b.y};
 }
 
 // Vector of world positions

@@ -12,6 +12,8 @@ class WorldView : public sf::Drawable, public sf::Transformable {
 
   void update();
 
+  size_t get_vertex_count() { return vertex_count; };
+
  private:
   const Tileset& tileset;
   const WorldController& w_controller;

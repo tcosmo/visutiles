@@ -18,7 +18,7 @@ int main() {
   WorldView w_view(CollatzTileset, w_controller);
   w_view.update();
 
-  GraphicEngine engine(w_controller, w_view, 1200, 800);
+  GraphicEngine engine(w_controller, w_view, CollatzTileset, 1200, 800);
 
   engine.run();
 }
