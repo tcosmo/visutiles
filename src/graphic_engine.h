@@ -37,8 +37,13 @@ class GraphicEngine {
   void camera_reset();
   void handle_camera_events(const sf::Event& event);
 
-  sf::View camera_view;
-  sf::View initial_camera_view;
-  sf::Vector2f camera_translation_vec;
-  float camera_zoom_step;
+  struct CameraParams {
+    sf::View view;
+    sf::View initial_view;
+    sf::Vector2f default_trans_vec;
+    float default_zoom_step;
+    bool mouse_has_left;
+    bool drag_move_mode;
+    sf::Vector2i mouse_position;
+  } camera_params;
 };

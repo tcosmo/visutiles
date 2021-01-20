@@ -8,7 +8,6 @@ GraphicEngine::GraphicEngine(WorldController& world_controller,
       tileset(tileset) {
   window.create(sf::VideoMode(screen_w, screen_h), visutiles_PROG_NAME);
   window.setFramerateLimit(TARGET_FPS);
-
   camera_init();
 }
 
