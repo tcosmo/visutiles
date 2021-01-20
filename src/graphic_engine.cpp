@@ -9,11 +9,7 @@ GraphicEngine::GraphicEngine(WorldController& world_controller,
   window.create(sf::VideoMode(screen_w, screen_h), visutiles_PROG_NAME);
   window.setFramerateLimit(TARGET_FPS);
 
-  camera.set_translation_vector(
-      {(float)tileset.tile_width, (float)tileset.tile_height});
-
-  camera.init_view(window);
-  window.setView(camera.camera_view);
+  camera_init();
 }
 
 GraphicEngine::~GraphicEngine() {}
@@ -31,8 +27,8 @@ void GraphicEngine::run() {
   while (window.isOpen()) {
     sf::Event event;
     while (window.pollEvent(event)) {
+      handle_camera_events(event);
       if (event.type == sf::Event::KeyPressed) {
-        camera.handle_camera_events(event);
         switch (event.key.code) {
           case sf::Keyboard::A:
             print_simulation_report();
@@ -47,10 +43,6 @@ void GraphicEngine::run() {
       if (event.type == sf::Event::Closed) window.close();
     }
 
-    if (camera.has_changed) {
-      window.setView(camera.camera_view);
-      camera.has_changed = false;
-    }
     window.clear(sf::Color(0.2 * 255, 0.2 * 255, 0.2 * 255));
     window.draw(world_view);
     window.display();

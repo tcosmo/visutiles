@@ -13,6 +13,12 @@
 #define WORLD_NORTH \
   sf::Vector2i({0, 1})  // That's not the same convention than SFML
 
+// Cardinal points for the graphic engine
+#define VIEW_WEST sf::Vector2f({-1, 0})
+#define VIEW_SOUTH sf::Vector2f({0, 1})
+#define VIEW_EAST sf::Vector2f({1, 0})
+#define VIEW_NORTH sf::Vector2f({0, -1})
+
 #define SQUARE_GRID_DIR \
   { WORLD_WEST, WORLD_SOUTH, WORLD_EAST, WORLD_NORTH }
 #define SQUARE_GRID_NEIGHBORING_SIZE 4

@@ -1,55 +1,53 @@
-#include "camera.h"
+#include "graphic_engine.h"
 
-Camera::Camera() : has_changed(false) {}
-
-void Camera::init_view(const sf::RenderWindow& window) {
+void GraphicEngine::camera_init() {
+  camera_translation_vec = {(float)tileset.tile_width,
+                            (float)tileset.tile_height};
   camera_view = window.getDefaultView();
-  center();
-  initial_view = camera_view;
-  has_changed = true;
+  initial_camera_view = camera_view;
+  camera_center();
+  window.setView(camera_view);
 }
 
-void Camera::center(const sf::Vector2f& where) {
+void GraphicEngine::camera_center(const sf::Vector2f& where) {
   camera_view.setCenter(where);
-  has_changed = true;
+  window.setView(camera_view);
 }
 
-void Camera::translate(const sf::Vector2f& d_pos) {
-  camera_view.move({d_pos.x, d_pos.y * -1});
-  has_changed = true;
+void GraphicEngine::camera_translate(const sf::Vector2f& d_pos) {
+  camera_view.move(d_pos);
+  window.setView(camera_view);
 }
 
-void Camera::reset() {
-  camera_view = initial_view;
-  has_changed = true;
-}
+void GraphicEngine::camera_reset() { camera_view = initial_camera_view; }
 
-void Camera::handle_camera_events(const sf::Event& event) {
-  // Translate view with Arrows and center when press C if (event.type ==
-  // sf::Event::KeyPressed) {
-  switch (event.key.code) {
-    case sf::Keyboard::C:
-      center();
-      break;
+void GraphicEngine::handle_camera_events(const sf::Event& event) {
+  // Translate view with Arrows and center when press C
+  if (event.type == sf::Event::KeyPressed) {
+    switch (event.key.code) {
+      case sf::Keyboard::C:
+        camera_center();
+        break;
 
-    case sf::Keyboard::Up:
-      translate(sf::Vector2f({0, 1}) * translation_vector);
-      break;
+      case sf::Keyboard::Up:
+        camera_translate(sf::Vector2f(VIEW_NORTH) * camera_translation_vec);
+        break;
 
-    case sf::Keyboard::Down:
-      translate(sf::Vector2f({0, -1}) * translation_vector);
-      break;
+      case sf::Keyboard::Down:
+        camera_translate(sf::Vector2f(VIEW_SOUTH) * camera_translation_vec);
+        break;
 
-    case sf::Keyboard::Right:
-      translate(sf::Vector2f({1, 0}) * translation_vector);
-      break;
+      case sf::Keyboard::Right:
+        camera_translate(sf::Vector2f(VIEW_EAST) * camera_translation_vec);
+        break;
 
-    case sf::Keyboard::Left:
-      translate(sf::Vector2f({-1, 0}) * translation_vector);
-      break;
+      case sf::Keyboard::Left:
+        camera_translate(sf::Vector2f(VIEW_WEST) * camera_translation_vec);
+        break;
 
-    default:
-      break;
+      default:
+        break;
+    }
   }
 
   // // Track mouse left events for replacing mouse in center if left
@@ -91,5 +89,3 @@ void Camera::handle_camera_events(const sf::Event& event) {
   //                              window);
   //   }
 }
-
-Camera::~Camera() {}

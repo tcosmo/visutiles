@@ -8,8 +8,6 @@
 #include "world_controller.h"
 #include "world_view.h"
 
-#include "camera.h"
-
 class GraphicEngine {
  public:
   GraphicEngine(WorldController& world_controller, WorldView& world_view,
@@ -28,5 +26,13 @@ class GraphicEngine {
 
   sf::RenderWindow window;
 
-  Camera camera;
+  void camera_init();
+  void camera_center(const sf::Vector2f& where = {0, 0});
+  void camera_translate(const sf::Vector2f& d_pos);
+  void camera_reset();
+  void handle_camera_events(const sf::Event& event);
+
+  sf::View camera_view;
+  sf::View initial_camera_view;
+  sf::Vector2f camera_translation_vec;
 };
