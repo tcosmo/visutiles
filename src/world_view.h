@@ -19,8 +19,11 @@ class WorldView : public sf::Drawable, public sf::Transformable {
   sf::Texture tileset_skin;
   void load_tileset_skin();
 
-  sf::VertexArray vertices;
-  void add_tile_vertices(const sf::Vector2i& pos, const TileId& tile_id);
+  sf::VertexBuffer vertex_buffer;
+  size_t vertex_count;
+
+  std::array<sf::Vertex, 4> get_tile_vertices(const sf::Vector2i& pos,
+                                              const TileId& tile_id);
   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
   std::map<sf::Vector2i, bool, CompareTilesPositions> position_seen;
