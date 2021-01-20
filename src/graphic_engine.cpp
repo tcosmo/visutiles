@@ -23,6 +23,21 @@ void GraphicEngine::print_simulation_report() {
          VERTEX_BUFFER_MAX_SIZE);
 }
 
+bool GraphicEngine::is_ctrl_pressed() {
+  return sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+         sf::Keyboard::isKeyPressed(sf::Keyboard::RControl);
+}
+
+bool GraphicEngine::is_shift_pressed() {
+  return sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
+         sf::Keyboard::isKeyPressed(sf::Keyboard::RShift);
+}
+
+bool GraphicEngine::is_alt_pressed() {
+  return sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) ||
+         sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt);
+}
+
 void GraphicEngine::run() {
   while (window.isOpen()) {
     sf::Event event;

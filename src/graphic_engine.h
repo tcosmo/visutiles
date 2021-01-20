@@ -17,6 +17,10 @@ class GraphicEngine {
   void run();
 
  private:
+  static bool is_ctrl_pressed();
+  static bool is_shift_pressed();
+  static bool is_alt_pressed();
+
   void print_simulation_report();
 
   WorldController& world_controller;
@@ -29,10 +33,12 @@ class GraphicEngine {
   void camera_init();
   void camera_center(const sf::Vector2f& where = {0, 0});
   void camera_translate(const sf::Vector2f& d_pos);
+  void camera_zoom(float zoom_factor);
   void camera_reset();
   void handle_camera_events(const sf::Event& event);
 
   sf::View camera_view;
   sf::View initial_camera_view;
   sf::Vector2f camera_translation_vec;
+  float camera_zoom_step;
 };

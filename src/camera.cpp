@@ -7,6 +7,7 @@ void GraphicEngine::camera_init() {
   initial_camera_view = camera_view;
   camera_center();
   window.setView(camera_view);
+  camera_zoom_step = 1.5;
 }
 
 void GraphicEngine::camera_center(const sf::Vector2f& where) {
@@ -16,6 +17,11 @@ void GraphicEngine::camera_center(const sf::Vector2f& where) {
 
 void GraphicEngine::camera_translate(const sf::Vector2f& d_pos) {
   camera_view.move(d_pos);
+  window.setView(camera_view);
+}
+
+void GraphicEngine::camera_zoom(float zoom_factor) {
+  camera_view.zoom(1 / zoom_factor);
   window.setView(camera_view);
 }
 
@@ -54,14 +60,14 @@ void GraphicEngine::handle_camera_events(const sf::Event& event) {
   // if (event.type == sf::Event::MouseLeft) cameraMouseLeft = true;
   // if (event.type == sf::Event::MouseEntered) cameraMouseLeft = false;
 
-  // if (event.type == sf::Event::MouseWheelScrolled)
-  //   if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
-  //     if (isControlPressed()) {
-  //       float zoomFactor = DEFAULT_CAM_ZOOM_STEP;
-  //       if (event.mouseWheelScroll.delta < 0) zoomFactor = 1 / zoomFactor;
-  //       cameraZoom(zoomFactor);
-  //     }
-  //   }
+  if (event.type == sf::Event::MouseWheelScrolled)
+    if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
+      if (is_ctrl_pressed()) {
+        float zoom_factor = camera_zoom_step;
+        if (event.mouseWheelScroll.delta < 0) zoom_factor = 1 / zoom_factor;
+        camera_zoom(zoom_factor);
+      }
+    }
 
   // if (event.type == sf::Event::MouseButtonPressed)
   //   if ((event.mouseButton.button == sf::Mouse::Middle)) {

@@ -17,10 +17,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-O3")
 
+# set(dkasses_compile_options_else
+#     -Wall -Wextra -Wextra -Wshadow -Wnon-virtual-dtor -Wold-style-cast
+#     -Wcast-align -Wunused -Woverloaded-virtual -Wpedantic -Wconversion
+#     -Wsign-conversion -Wmisleading-indentation -Wduplicated-cond
+#     -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wuseless-cast
+#     -Wdouble-promotion -Wformat=2)
+
+
+
 file(GLOB SOURCES "src/*.cpp" "src/third_party/tinyxml/tinyxml2.cpp")
 
 set(EXECUTABLE_NAME "visutiles")
 add_executable(visutiles ${SOURCES})
+#target_compile_options(visutiles PRIVATE ${dkasses_compile_options_else})
 
 # Detect and add SFML
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
