@@ -6,6 +6,8 @@
 
 #include "tileset.h"
 
+typedef std::map<sf::Vector2i, TileId, CompareTilesPositions> TileMap;
+
 // The world consists in an assembly (non necessarily connected) of tiles on
 // the square grid. Each position can hold exactly one tile.
 class World {
@@ -14,7 +16,7 @@ class World {
   ~World();
 
   /* Attributes */
-  std::map<sf::Vector2i, TileId, CompareTilesPositions> tile_at_pos;
+  TileMap tile_at_pos;
 
   const Tileset& tileset;
 

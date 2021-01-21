@@ -40,11 +40,11 @@ std::array<sf::Vertex, 4> WorldView::get_tile_vertices(const sf::Vector2i& pos,
 }
 
 void WorldView::update() {
-  if (w_controller.newly_added_tiles.size() == 0) return;
+  if (w_controller.get_newly_added_tiles().size() == 0) return;
 
   std::vector<sf::Vertex> vertices_to_add;
   for (const std::pair<sf::Vector2i, TileId>& pos_and_tile :
-       w_controller.newly_added_tiles) {
+       w_controller.get_newly_added_tiles()) {
     sf::Vector2i pos = pos_and_tile.first;
     if (position_seen.find(pos) != position_seen.end()) {
       warning_log("Position (%d,%d) has already be drawn in the past.\n", pos.x,

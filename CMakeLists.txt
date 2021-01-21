@@ -4,6 +4,7 @@ project(visutiles LANGUAGES CXX)
 
 set(visutiles_VERSION_MAJOR 0)
 set(visutiles_VERSION_MINOR 1)
+set(visutiles_VERSION_PATCH 2)
 set(visutiles_PROG_NAME "VisuTiles")
 set(visutiles_PROG_NAME_EXEC "visutiles")
 configure_file(
