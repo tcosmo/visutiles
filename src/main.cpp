@@ -26,8 +26,8 @@ int main(int argc, char** argv) {
   std::unique_ptr<InputFactory> input_factory;
 
   if (arguments.inputType == COLLATZ_PARITY_VECTOR) {
-    input_factory = std::unique_ptr<InputFactory>(
-        new CollatzInputFactory(arguments.inputType, arguments.inputStr));
+    input_factory = std::unique_ptr<InputFactory>(new CollatzInputFactory(
+        arguments.inputType, arguments.inputStr, CollatzTileset));
   } else {
     input_factory = std::unique_ptr<InputFactory>(
         new InputFactory(arguments.inputType, arguments.inputStr));

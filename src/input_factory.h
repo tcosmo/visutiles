@@ -17,17 +17,23 @@ class InputFactory {
 
   virtual TileMap get_initial_configuration();
 
- private:
+ protected:
   InputType input_type;
   std::string input_str;
 };
 
 class CollatzInputFactory : public InputFactory {
  public:
-  CollatzInputFactory(InputType input_type, const std::string& input_str)
-      : InputFactory(input_type, input_str) {}
+  CollatzInputFactory(InputType input_type, const std::string& input_str,
+                      Tileset& CollatzTileset)
+      : InputFactory(input_type, input_str), CollatzTileset(CollatzTileset) {}
 
   ~CollatzInputFactory() {}
 
   TileMap get_initial_configuration();
+  TileMap build_parity_vector_initial_configuration();
+
+ private:
+  Tileset& CollatzTileset;  // not const because tileset query cannot be made
+                            // const because of memoization
 };

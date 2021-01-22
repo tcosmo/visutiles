@@ -9,7 +9,7 @@ WorldView::WorldView(const Tileset& tileset,
   vertex_count = 0;
 
   load_tileset_skin();
-  setRotation(tileset.rotation);
+  // setRotation(tileset.rotation);
   setScale({tileset.scale_x, tileset.scale_y});
 }
 
