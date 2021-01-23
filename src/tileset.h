@@ -35,6 +35,10 @@ class Tileset {
     return alphabet_names;
   }
 
+  char get_edge_char(EdgeColor c) const {
+    return alphabet.at(c.first).at(c.second);
+  }
+
   std::vector<EdgeColor> all_edge_colors;
 
  private:

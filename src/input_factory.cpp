@@ -1,4 +1,5 @@
 #include "input_factory.h"
+#include "Collatz.h"
 
 EdgeMap InputFactory::get_initial_configuration() {
   EdgeMap to_return;
@@ -28,6 +29,27 @@ EdgeMap CollatzInputFactory::build_dummy_initial_configuration() {
 
 EdgeMap CollatzInputFactory::build_parity_vector_initial_configuration() {
   EdgeMap to_return;
+
+  ParityVector parvec(input_str);
+
+  sf::Vector2i last{0, 0};
+  sf::Vector2i curr{0, 0};
+  for (bool p : parvec.parvec) {
+    if (p == EVEN) {
+      curr += WORLD_WEST;
+      to_return[OrderedPosCouple(curr, last)] = {std::string("bin"), 0};
+      last = curr;
+      continue;
+    }
+
+    curr += WORLD_SOUTH;
+    to_return[OrderedPosCouple(curr, last)] = {std::string("ter"), 1};
+    last = curr;
+    curr += WORLD_WEST;
+    to_return[OrderedPosCouple(curr, last)] = {std::string("bin"), 0};
+    last = curr;
+  }
+
   return to_return;
 }
 

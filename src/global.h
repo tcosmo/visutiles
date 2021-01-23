@@ -49,6 +49,7 @@
 const static int GRAPHIC_EDGE_THICK = 5;
 const static int GRAPHIC_EDGE_WIDTH = 64;
 const static int GRAPHIC_TILE_SIZE = GRAPHIC_EDGE_WIDTH;
+const static int GRAPHIC_EDGE_TEXT_SIZE = 20;
 
 // A bit of
 // https://github.com/chrisBRN/Lots_Of_Colors/blob/master/lots_of_colors_sfml.h
@@ -68,7 +69,9 @@ static const sf::Color cga_14{255, 245, 95};   // FFFF55FF
 static const sf::Color cga_15{250, 165, 80};   // FFAA5500
 static const sf::Color cga_16{255, 255, 245};  // FFFFFF55
 
-static const std::vector<sf::Color> COLOR_WHEEL = {
+static const std::array COLOR_WHEEL = {
     sf::Color::Green, sf::Color::Red, cga_02, cga_03, cga_05, cga_06,
     cga_07,           cga_08,         cga_09, cga_10, cga_11, cga_12,
     cga_13,           cga_14,         cga_15, cga_16};
+
+static const char* DEFAULT_FONT = "assets/fonts/arial.ttf";
