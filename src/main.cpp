@@ -41,8 +41,6 @@ int main(int argc, char** argv) {
   if (!default_font.loadFromFile(DEFAULT_FONT)) {
     fatal_error_log("Could not load font `%s`! Abort.\n", DEFAULT_FONT);
   }
-  printf("%s %d\n", default_font.getInfo().family.c_str(),
-         default_font.getTexture(32).getSize().x);
 
   // World view
   WorldView w_view(Collatz_tileset, w_controller, default_font);

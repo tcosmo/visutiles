@@ -45,12 +45,6 @@
     exit(1);                                                          \
   } while (0)
 
-// Some graphic parameters
-const static int GRAPHIC_EDGE_THICK = 5;
-const static int GRAPHIC_EDGE_WIDTH = 64;
-const static int GRAPHIC_TILE_SIZE = GRAPHIC_EDGE_WIDTH;
-const static int GRAPHIC_EDGE_TEXT_SIZE = 20;
-
 // A bit of
 // https://github.com/chrisBRN/Lots_Of_Colors/blob/master/lots_of_colors_sfml.h
 
