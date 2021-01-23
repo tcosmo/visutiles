@@ -17,7 +17,7 @@ void GraphicEngine::print_simulation_report() {
   printf("=== Simulation Report ===\n");
   printf("   == Tiles ==\n");
   printf("      - Total number of tiles: %zu\n",
-         world_controller.get_tile_count());
+         world_controller.get_edge_count());
   printf("      - World vertex count: %zu/%d\n", world_view.get_vertex_count(),
          VERTEX_BUFFER_MAX_SIZE);
 }

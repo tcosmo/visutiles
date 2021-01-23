@@ -15,7 +15,7 @@ class InputFactory {
 
   virtual ~InputFactory() {}
 
-  virtual TileMap get_initial_configuration();
+  virtual EdgeMap get_initial_configuration();
 
  protected:
   InputType input_type;
@@ -30,8 +30,9 @@ class CollatzInputFactory : public InputFactory {
 
   ~CollatzInputFactory() {}
 
-  TileMap get_initial_configuration();
-  TileMap build_parity_vector_initial_configuration();
+  EdgeMap get_initial_configuration();
+  EdgeMap build_parity_vector_initial_configuration();
+  EdgeMap build_dummy_initial_configuration();
 
  private:
   Tileset& CollatzTileset;  // not const because tileset query cannot be made

@@ -1,11 +1,11 @@
 #include "graphic_engine.h"
 
 void GraphicEngine::camera_init() {
-  camera_params.default_trans_vec = {(float)tileset.tile_width,
-                                     (float)tileset.tile_height};
+  camera_params.default_trans_vec = {(float)GRAPHIC_TILE_SIZE,
+                                     (float)GRAPHIC_TILE_SIZE};
   camera_params.view = window.getDefaultView();
-  camera_params.initial_view = camera_params.view;
   camera_center();
+  camera_params.initial_view = sf::View(camera_params.view);
   window.setView(camera_params.view);
   camera_params.default_zoom_step = 1.5;
   camera_params.drag_move_mode = false;
@@ -28,7 +28,8 @@ void GraphicEngine::camera_zoom(float zoom_factor) {
 }
 
 void GraphicEngine::camera_reset() {
-  camera_params.view = camera_params.initial_view;
+  camera_params.view = sf::View(camera_params.initial_view);
+  window.setView(camera_params.view);
 }
 
 // Handling some standard camera UX (translation, zoom, drag move)
@@ -38,6 +39,10 @@ void GraphicEngine::handle_camera_events(const sf::Event& event) {
     switch (event.key.code) {
       case sf::Keyboard::C:
         camera_center();
+        break;
+
+      case sf::Keyboard::R:
+        camera_reset();
         break;
 
       case sf::Keyboard::Up:

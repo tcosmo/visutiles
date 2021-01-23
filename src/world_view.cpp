@@ -8,52 +8,59 @@ WorldView::WorldView(const Tileset& tileset,
   vertex_buffer.create(VERTEX_BUFFER_MAX_SIZE);
   vertex_count = 0;
 
-  load_tileset_skin();
-  // setRotation(tileset.rotation);
-  setScale({tileset.scale_x, tileset.scale_y});
+  for (size_t i_alphabet = 0; i_alphabet < tileset.get_alphabet_names().size();
+       i_alphabet += 1)
+    alphabet_color[tileset.get_alphabet_names()[i_alphabet]] =
+        COLOR_WHEEL[i_alphabet % COLOR_WHEEL.size()];
 }
 
-std::array<sf::Vertex, 4> WorldView::get_tile_vertices(const sf::Vector2i& pos,
-                                                       const TileId& tile_id) {
+sf::Vector2f WorldView::world_point_to_screen_point(const sf::Vector2i& pos) {
+  return {((float)GRAPHIC_TILE_SIZE) * ((float)pos.x),
+          ((float)GRAPHIC_TILE_SIZE) * (-1 * ((float)pos.y))};
+}
+
+std::array<sf::Vertex, 4> WorldView::get_edge_vertices(
+    const PosEdge& pos_and_edge) {
+  sf::Vector2i point_A = pos_and_edge.first.first;
+  sf::Vector2i point_B = pos_and_edge.first.second;
+
+  sf::Vector2f screen_point_A = world_point_to_screen_point(point_A);
+  sf::Vector2f screen_point_B = world_point_to_screen_point(point_B);
+
+  sf::Vector2f normal_vect =
+      get_normal_unit_vector(screen_point_B - screen_point_A);
+
+  sf::Vector2f screen_point_C = screen_point_B + normal_vect;
+  sf::Vector2f screen_point_D = screen_point_A + normal_vect;
+
   std::array<sf::Vertex, 4> quad;
-
-  sf::Vector2f top_left = {(float)(pos.x * ((float)tileset.tile_width)),
-                           (float)(-1 * pos.y * ((float)tileset.tile_height))};
-  sf::Vector2f one_x = {(float)tileset.tile_width, 0};
-  sf::Vector2f one_y = {0, (float)tileset.tile_height};
-
   // define its 4 corners
-  quad[0].position = top_left;
-  quad[1].position = top_left + one_x;
-  quad[2].position = top_left + one_x + one_y;
-  quad[3].position = top_left + one_y;
+  quad[0].position = screen_point_A;
+  quad[1].position = screen_point_B;
+  quad[2].position = screen_point_C;
+  quad[3].position = screen_point_D;
 
-  // define its 4 texture coordinates
-  quad[0].texCoords = {(float)tileset.tile_width * tile_id, 0};
-  quad[1].texCoords = {(float)tileset.tile_width * (tile_id + 1), 0};
-  quad[2].texCoords = {(float)tileset.tile_width * (tile_id + 1),
-                       (float)tileset.tile_height};
-  quad[3].texCoords = {(float)tileset.tile_width * tile_id,
-                       (float)tileset.tile_height};
+  quad[0].color = alphabet_color[pos_and_edge.second.first];
+  quad[1].color = alphabet_color[pos_and_edge.second.first];
+  quad[2].color = alphabet_color[pos_and_edge.second.first];
+  quad[3].color = alphabet_color[pos_and_edge.second.first];
 
   return quad;
 }
 
 void WorldView::update() {
-  if (w_controller.get_newly_added_tiles().size() == 0) return;
+  if (w_controller.get_newly_added_edges().size() == 0) return;
 
   std::vector<sf::Vertex> vertices_to_add;
-  for (const std::pair<sf::Vector2i, TileId>& pos_and_tile :
-       w_controller.get_newly_added_tiles()) {
-    sf::Vector2i pos = pos_and_tile.first;
-    if (position_seen.find(pos) != position_seen.end()) {
-      warning_log("Position (%d,%d) has already be drawn in the past.\n", pos.x,
-                  pos.y);
+  for (const PosEdge& pos_and_edge : w_controller.get_newly_added_edges()) {
+    OrderedPosCouple edge = pos_and_edge.first;
+    if (edge_seen.find(edge) != edge_seen.end()) {
+      warning_log("Edge {(%d,%d),(%d,%d)} has already be drawn in the past.\n",
+                  edge.first.x, edge.first.y, edge.second.x, edge.second.y);
     }
-    position_seen[pos] = true;
+    edge_seen[edge] = true;
 
-    std::array<sf::Vertex, 4> tile_vertices =
-        get_tile_vertices(pos, pos_and_tile.second);
+    std::array<sf::Vertex, 4> tile_vertices = get_edge_vertices(pos_and_edge);
 
     for (sf::Vertex v : tile_vertices) vertices_to_add.push_back(v);
   }
@@ -72,24 +79,12 @@ void WorldView::update() {
   vertex_count += vertices_to_add.size();
 }
 
-void WorldView::load_tileset_skin() {
-  const std::string& tileset_skin_name = tileset.tilset_skin;
-
-  std::string tile_skin_path =
-      tileset.tsx_file_dir + OS_FILE_SEPARATOR + tileset_skin_name;
-
-  if (!tileset_skin.loadFromFile(tile_skin_path)) {
-    fatal_error_log("Could not load tile skin `%s`. Abort.",
-                    tile_skin_path.c_str());
-  }
-}
-
 void WorldView::draw(sf::RenderTarget& target, sf::RenderStates states) const {
   // apply the transform
   states.transform *= getTransform();
 
   // apply the tileset texture
-  states.texture = &tileset_skin;
+  // states.texture = &tileset_skin;
   // draw the vertex array
   // target.draw(vertices, states);
   target.draw(vertex_buffer, states);

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "config.h"
+#include "geometry.h"
 
 #include <assert.h>
-#include <SFML/Graphics.hpp>  // for sf::Vector2i
 #include <cstdlib>
 
 #ifdef _WIN32
@@ -45,26 +45,30 @@
     exit(1);                                                          \
   } while (0)
 
-struct CompareTilesPositions {
-  bool operator()(const sf::Vector2<int> &a, const sf::Vector2<int> &b) const {
-    if (a.x == b.x) return a.y < b.y;
-    return a.x < b.x;
-  }
-};
+// Some graphic parameters
+const static int GRAPHIC_EDGE_THICK = 5;
+const static int GRAPHIC_EDGE_WIDTH = 64;
+const static int GRAPHIC_TILE_SIZE = GRAPHIC_EDGE_WIDTH;
 
-// Multiplying a vector by a scalar
-template <typename T, typename U>
-static sf::Vector2<T> operator*(U scalar, const sf::Vector2<T> &vector) {
-  sf::Vector2<T> toReturn = vector;
-  return {toReturn.x * scalar, toReturn.y * scalar};
-}
+// A bit of
+// https://github.com/chrisBRN/Lots_Of_Colors/blob/master/lots_of_colors_sfml.h
 
-// Multiplying two vectors component by component
-template <typename T>
-static sf::Vector2<T> operator*(const sf::Vector2<T> &a,
-                                const sf::Vector2<T> &b) {
-  return {a.x * b.x, a.y * b.y};
-}
+static const sf::Color cga_02{245, 85, 85};    // FF555555
+static const sf::Color cga_03{250, 170, 170};  // FFAAAAAA
+static const sf::Color cga_05{240, 0, 10};     // FF0000AA
+static const sf::Color cga_06{245, 85, 95};    // FF5555FF
+static const sf::Color cga_07{240, 10, 160};   // FF00AA00
+static const sf::Color cga_08{245, 95, 245};   // FF55FF55
+static const sf::Color cga_09{240, 10, 170};   // FF00AAAA
+static const sf::Color cga_10{245, 95, 255};   // FF55FFFF
+static const sf::Color cga_11{250, 160, 0};    // FFAA0000
+static const sf::Color cga_12{255, 245, 85};   // FFFF5555
+static const sf::Color cga_13{250, 160, 10};   // FFAA00AA
+static const sf::Color cga_14{255, 245, 95};   // FFFF55FF
+static const sf::Color cga_15{250, 165, 80};   // FFAA5500
+static const sf::Color cga_16{255, 255, 245};  // FFFFFF55
 
-// Vector of world positions
-typedef std::vector<sf::Vector2i> PosVec;
+static const std::vector<sf::Color> COLOR_WHEEL = {
+    sf::Color::Green, sf::Color::Red, cga_02, cga_03, cga_05, cga_06,
+    cga_07,           cga_08,         cga_09, cga_10, cga_11, cga_12,
+    cga_13,           cga_14,         cga_15, cga_16};

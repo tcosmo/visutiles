@@ -4,86 +4,51 @@
 #include <string>
 #include <vector>
 
-#include "third_party/tinyxml/tinyxml2.h"
+#include "third_party/json11/json11.hpp"
 
 #include "global.h"
-
 #include "square_grid.h"
 
-// Valid colors are >= 0 ids. Value -1 can be used to mean "no color".
-#define WANG_NO_COLOR -1
-typedef int WangColor;
+typedef std::string EdgeAlphabetName;
+// We use char for the following in order to draw information on the screen
+// easily, relying on ASCII textures
+typedef char EdgeChar;
+typedef char TileName;
 
-typedef int TileId;
+// An edge color is given by an alphabet name and a character in that alphabet
+typedef std::pair<std::string, int> EdgeColor;
+static const std::pair<std::string, int> ANY_EDGE_COLOR = {"", -1};
 
-// Tiles on the square grid with Wang colors on edges
-struct Tile {
-  Tile() {
-    for (size_t i_dir = 0; i_dir < SQUARE_GRID_NEIGHBORING_SIZE; i_dir += 1)
-      wang_edges[i_dir] = WANG_NO_COLOR;
-  }
-  Tile(TileId id,
-       std::array<WangColor, SQUARE_GRID_NEIGHBORING_SIZE> wang_edges,
-       std::string type, uint32_t skin_width, uint32_t skin_height)
-      : wang_edges(wang_edges),
-        type(type),
-        skin_width(skin_width),
-        skin_height(skin_height) {}
-
-  TileId id;
-  // Wang color on each side of the tile in order West, South, East, North
-  std::array<WangColor, SQUARE_GRID_NEIGHBORING_SIZE> wang_edges;
-  // The tile type is just a name/comment that user can define in
-  // the .tsx interface.
-  std::string type;
-  uint32_t skin_width;
-  uint32_t skin_height;
-};
-
-// Represents a tileset, we expect one skin file per tile with a .tsx
-// file which summarises tileset information (tiles and Wang colors)
-// .tsx files are produced by free open source software "Tiled Map Editor"
-// Cf: https://www.mapeditor.org/
 class Tileset {
  public:
-  Tileset(std::string tsx_file_dir, std::string tsx_filename);
+  Tileset(std::string json_file_dir, std::string json_filename);
   ~Tileset();
 
-  // Returns the set of ids of tiles which satisfies having specific color on
-  // their edges in order West, South, East, North. If one of these colors is -1
-  // then no constraints is enforced on that side.
-  std::vector<TileId> Wang_query(
-      std::array<WangColor, SQUARE_GRID_NEIGHBORING_SIZE> color_constraints);
+  // Return the set of tiles satisfying some given edge colors constraints
+  std::vector<TileName> Wang_query(std::array<EdgeColor, 4> edge_constraints);
 
-  // We use map and not vector to match with tile ids which are
-  // specified in .tsx file and used by Wang tiles.
-  std::map<TileId, Tile> tiles;
-  std::vector<WangColor> wang_colors;
-  uint32_t tile_count;
-  std::string tileset_name;
-  uint32_t tile_width, tile_height;
-  uint32_t tileset_width, tileset_height;
+  void print_edge_color(const EdgeColor& c) {
+    printf("%s, `%c`\n", c.first.c_str(), alphabet[c.first][c.second]);
+  }
 
-  std::string tsx_filename;
-  std::string tsx_file_dir;
-  std::string tsx_file_path;
+  const std::vector<EdgeAlphabetName>& get_alphabet_names() const {
+    return alphabet_names;
+  }
 
-  std::string tilset_skin;
-
-  // Rotation common to all tiles. For instance 45° in the case of
-  // Collatz tileset.
-  float rotation;
-  float scale_x;
-  float scale_y;
+  std::vector<EdgeColor> all_edge_colors;
 
  private:
-  void parse_tsx_file();
-  void tsx_extract_tiles(tinyxml2::XMLElement* root);
-  void tsx_extract_Wang_colors(tinyxml2::XMLElement* root);
+  std::string json_file_dir;
+  std::string json_filename;
 
-  std::map<std::array<WangColor, SQUARE_GRID_NEIGHBORING_SIZE>,
-           std::vector<TileId>>
-      memoize_queries;
+  std::map<std::array<EdgeColor, 4>, std::vector<TileName>> memoize_queries;
 
-  tinyxml2 ::XMLDocument tsx_xml_doc;
+  void parse_json_file();
+
+  std::vector<EdgeAlphabetName> alphabet_names;
+  std::map<EdgeAlphabetName, std::vector<EdgeChar>> alphabet;
+  std::array<EdgeAlphabetName, SQUARE_GRID_NEIGHBORING_SIZE> alphabet_on_edge;
+  std::map<TileName, std::array<EdgeColor, 4>> tile_specification;
+
+  json11::Json json_doc;
 };

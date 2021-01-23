@@ -13,7 +13,7 @@ configure_file(
   )
 include_directories("${PROJECT_BINARY_DIR}")
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-O3")
@@ -27,7 +27,7 @@ set(CMAKE_CXX_FLAGS "-O3")
 
 
 
-file(GLOB SOURCES "src/*.cpp" "src/third_party/tinyxml/tinyxml2.cpp")
+file(GLOB SOURCES "src/*.cpp" "src/third_party/json11/json11.cpp")
 
 set(EXECUTABLE_NAME "visutiles")
 add_executable(visutiles ${SOURCES})

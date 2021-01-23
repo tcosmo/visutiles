@@ -18,15 +18,16 @@ class WorldView : public sf::Drawable, public sf::Transformable {
   const Tileset& tileset;
   const WorldController& w_controller;
 
-  sf::Texture tileset_skin;
-  void load_tileset_skin();
-
   sf::VertexBuffer vertex_buffer;
   size_t vertex_count;
 
-  std::array<sf::Vertex, 4> get_tile_vertices(const sf::Vector2i& pos,
-                                              const TileId& tile_id);
+  std::array<sf::Vertex, 4> get_edge_vertices(const PosEdge& pos_and_edge);
+
+  sf::Vector2f world_point_to_screen_point(const sf::Vector2i& pos);
+
   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
-  std::map<sf::Vector2i, bool, CompareTilesPositions> position_seen;
+  std::map<OrderedPosCouple, bool, CompareOrderedPosCouple> edge_seen;
+
+  std::map<EdgeAlphabetName, sf::Color> alphabet_color;
 };

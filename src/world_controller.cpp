@@ -1,14 +1,15 @@
 #include "world_controller.h"
 
-WorldController::WorldController(World& w) : w(w) {}
+WorldController::WorldController(World& w, Tileset& tileset)
+    : w(w), tileset(tileset) {}
 
 void WorldController::init_world() {}
 
-void WorldController::init_world(TileMap initial_configuration) {
-  w.tile_at_pos = std::move(initial_configuration);
+void WorldController::init_world(EdgeMap initial_configuration) {
+  w.edges = std::move(initial_configuration);
 
-  for (const std::pair<sf::Vector2i, TileId>& pos_and_tile : w.tile_at_pos) {
-    newly_added_tiles.push_back(pos_and_tile);
+  for (const PosEdge& pos_and_edge : w.edges) {
+    newly_added_edges.push_back(pos_and_edge);
   }
 }
 

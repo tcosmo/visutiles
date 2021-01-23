@@ -6,7 +6,9 @@
 
 #include "tileset.h"
 
-typedef std::map<sf::Vector2i, TileId, CompareTilesPositions> TileMap;
+typedef std::map<OrderedPosCouple, EdgeColor, CompareOrderedPosCouple> EdgeMap;
+
+typedef std::pair<OrderedPosCouple, EdgeColor> PosEdge;
 
 // The world consists in an assembly (non necessarily connected) of tiles on
 // the square grid. Each position can hold exactly one tile.
@@ -16,7 +18,7 @@ class World {
   ~World();
 
   /* Attributes */
-  TileMap tile_at_pos;
+  EdgeMap edges;
 
   const Tileset& tileset;
 
