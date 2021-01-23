@@ -14,19 +14,8 @@ void input_world(const Arguments& arguments, Tileset& tileset,
                  WorldController& w_controller) {
   std::unique_ptr<InputFactory> input_factory;
 
-  switch (arguments.inputType) {
-    case COLLATZ_PARITY_VECTOR:
-      input_factory = std::unique_ptr<InputFactory>(new CollatzInputFactory(
-          arguments.inputType, arguments.inputStr, tileset));
-      break;
-
-    default:
-      input_factory = std::unique_ptr<InputFactory>(new CollatzInputFactory(
-          arguments.inputType, arguments.inputStr, tileset));
-      // input_factory = std::unique_ptr<InputFactory>(
-      //     new InputFactory(arguments.inputType, arguments.inputStr));
-      break;
-  }
+  input_factory = std::unique_ptr<InputFactory>(new CollatzInputFactory(
+      arguments.inputType, arguments.inputStr, tileset));
 
   w_controller.init_world(
       std::move(input_factory->get_initial_configuration()));
