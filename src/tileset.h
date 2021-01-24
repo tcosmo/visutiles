@@ -36,7 +36,13 @@ class Tileset {
   }
 
   char get_edge_char(EdgeColor c) const {
+    assert(!(c.second < 0 || c.second >= alphabet.at(c.first).size()));
     return alphabet.at(c.first).at(c.second);
+  }
+
+  const std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE>& get_tile_spec(
+      TileName tile_name) const {
+    return tile_specification.at(tile_name);
   }
 
   std::vector<EdgeColor> all_edge_colors;
@@ -52,7 +58,8 @@ class Tileset {
   std::vector<EdgeAlphabetName> alphabet_names;
   std::map<EdgeAlphabetName, std::vector<EdgeChar>> alphabet;
   std::array<EdgeAlphabetName, SQUARE_GRID_NEIGHBORING_SIZE> alphabet_on_edge;
-  std::map<TileName, std::array<EdgeColor, 4>> tile_specification;
+  std::map<TileName, std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE>>
+      tile_specification;
 
   json11::Json json_doc;
 };

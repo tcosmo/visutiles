@@ -1,11 +1,8 @@
 #include "graphic_engine.h"
 
-GraphicEngine::GraphicEngine(WorldController& world_controller,
-                             WorldView& world_view, const Tileset& tileset,
-                             int screen_w, int screen_h)
-    : world_controller(world_controller),
-      world_view(world_view),
-      tileset(tileset) {
+GraphicEngine::GraphicEngine(World& world, WorldView& world_view,
+                             const Tileset& tileset, int screen_w, int screen_h)
+    : world(world), world_view(world_view), tileset(tileset) {
   window.create(sf::VideoMode(screen_w, screen_h), visutiles_PROG_NAME);
   window.setFramerateLimit(TARGET_FPS);
   camera_init();
@@ -15,9 +12,16 @@ GraphicEngine::~GraphicEngine() {}
 
 void GraphicEngine::print_simulation_report() {
   printf("=== Simulation Report ===\n");
-  printf("   == Tiles ==\n");
-  printf("      - Total number of tiles: %zu\n",
-         world_controller.get_edge_count());
+  printf("   == Edges ==\n");
+  printf("      - Total number of edges: %zu\n", world.edge_count());
+  printf("\n   == Tiles ==\n");
+  printf("      - Uncompleted tiles: %zu\n", world.uncompleted_tile_count());
+  printf("      - Completed tiles: %zu\n", world.completed_tile_count());
+  printf("      - Dead tiles: %zu\n", world.dead_tile_count());
+  printf("      - Versa tiles: %zu\n", world.versa_tile_count());
+
+  printf("\n   == Graphics ==\n");
+
   printf("      - World vertex count: %zu/%d\n", world_view.get_vertex_count(),
          VERTEX_BUFFER_MAX_SIZE);
 }
@@ -46,6 +50,11 @@ void GraphicEngine::run() {
         switch (event.key.code) {
           case sf::Keyboard::A:
             print_simulation_report();
+            break;
+
+          case sf::Keyboard::N:
+            world.update();
+            world_view.update();
             break;
 
           case sf::Keyboard::Escape:

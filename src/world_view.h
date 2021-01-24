@@ -1,7 +1,7 @@
 #pragma once
 
 #include "global.h"
-#include "world_controller.h"
+#include "world.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -9,12 +9,11 @@
 const static int GRAPHIC_EDGE_THICK = 5;
 const static int GRAPHIC_EDGE_WIDTH = 64;
 const static int GRAPHIC_TILE_SIZE = GRAPHIC_EDGE_WIDTH;
-const static int GRAPHIC_EDGE_TEXT_SIZE = 20;
+const static int GRAPHIC_EDGE_TEXT_SIZE = GRAPHIC_EDGE_WIDTH / 3;
 
 class WorldView : public sf::Drawable, public sf::Transformable {
  public:
-  WorldView(const Tileset& tileset, const WorldController& w_controller,
-            const sf::Font& font);
+  WorldView(const Tileset& tileset, const World& world, const sf::Font& font);
   ~WorldView();
 
   void update();
@@ -23,7 +22,7 @@ class WorldView : public sf::Drawable, public sf::Transformable {
 
  private:
   const Tileset& tileset;
-  const WorldController& w_controller;
+  const World& world;
 
   sf::VertexBuffer vertex_buffer;
   size_t vertex_count;

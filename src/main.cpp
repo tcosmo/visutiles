@@ -4,21 +4,18 @@
 
 #include "tileset.h"
 #include "world.h"
-#include "world_controller.h"
 #include "world_view.h"
 
 #include "arguments.h"
 #include "input_factory.h"
 
-void input_world(const Arguments& arguments, Tileset& tileset,
-                 WorldController& w_controller) {
+void input_world(const Arguments& arguments, Tileset& tileset, World& w) {
   std::unique_ptr<InputFactory> input_factory;
 
   input_factory = std::unique_ptr<InputFactory>(new CollatzInputFactory(
       arguments.inputType, arguments.inputStr, tileset));
 
-  w_controller.init_world(
-      std::move(input_factory->get_initial_configuration()));
+  w.set_edges(std::move(input_factory->get_initial_configuration()));
 }
 
 int main(int argc, char** argv) {
@@ -31,10 +28,9 @@ int main(int argc, char** argv) {
                           "CollatzTileset.json");
 
   World w(Collatz_tileset);
-  WorldController w_controller(w, Collatz_tileset);
 
   // Build initial configuration from parsed command line args
-  input_world(arguments, Collatz_tileset, w_controller);
+  input_world(arguments, Collatz_tileset, w);
 
   sf::Font default_font;
 
@@ -43,11 +39,11 @@ int main(int argc, char** argv) {
   }
 
   // World view
-  WorldView w_view(Collatz_tileset, w_controller, default_font);
+  WorldView w_view(Collatz_tileset, w, default_font);
   w_view.update();
 
   // Simulation engine
-  GraphicEngine engine(w_controller, w_view, Collatz_tileset, 1200, 800);
+  GraphicEngine engine(w, w_view, Collatz_tileset, 1200, 800);
   engine.run();
 
   return 0;

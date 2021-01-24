@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include "config.h"
 
 #include <math.h>
@@ -34,7 +35,8 @@ struct OrderedPosCouple {
 
 struct CompareOrderedPosCouple {
   bool operator()(const OrderedPosCouple &a, const OrderedPosCouple &b) const {
-    return OrderedPosCouple::cmp(a.first, b.first);
+    if (a.first != b.first) return OrderedPosCouple::cmp(a.first, b.first);
+    return OrderedPosCouple::cmp(a.second, b.second);
   }
 };
 
@@ -54,6 +56,7 @@ static sf::Vector2<T> operator*(const sf::Vector2<T> &a,
 
 // Vector of world positions
 typedef std::vector<sf::Vector2i> PosVec;
+typedef std::set<sf::Vector2i, CompareTilesPositions> PosSet;
 
 inline float Euclidean_norm(const sf::Vector2f &vect) {
   return sqrt(vect.x * vect.x + vect.y * vect.y);

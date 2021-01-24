@@ -1,8 +1,8 @@
 #include "world_view.h"
 
-WorldView::WorldView(const Tileset& tileset,
-                     const WorldController& w_controller, const sf::Font& font)
-    : tileset(tileset), w_controller(w_controller), font(font) {
+WorldView::WorldView(const Tileset& tileset, const World& world,
+                     const sf::Font& font)
+    : tileset(tileset), world(world), font(font) {
   vertex_buffer.setPrimitiveType(sf::Quads);
   vertex_buffer.setUsage(sf::VertexBuffer::Usage::Dynamic);
   vertex_buffer.create(VERTEX_BUFFER_MAX_SIZE);
@@ -100,10 +100,11 @@ std::array<sf::Vertex, 4> WorldView::get_edge_char_vertices(
 }
 
 void WorldView::update() {
-  if (w_controller.get_newly_added_edges().size() == 0) return;
+  const std::vector<PosEdge> newly_added_edges = world.get_newly_added_edges();
+  if (newly_added_edges.size() == 0) return;
 
   std::vector<sf::Vertex> vertices_to_add;
-  for (const PosEdge& pos_and_edge : w_controller.get_newly_added_edges()) {
+  for (const PosEdge& pos_and_edge : newly_added_edges) {
     OrderedPosCouple edge = pos_and_edge.first;
     if (edge_seen.find(edge) != edge_seen.end()) {
       warning_log("Edge {(%d,%d),(%d,%d)} has already be drawn in the past.\n",
