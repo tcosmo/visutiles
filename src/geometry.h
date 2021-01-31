@@ -16,6 +16,8 @@ struct CompareTilesPositions {
 struct OrderedPosCouple {
   static CompareTilesPositions cmp;
 
+  OrderedPosCouple() {}
+
   OrderedPosCouple(const sf::Vector2i &pos_a, const sf::Vector2i &pos_b) {
     if (cmp(pos_a, pos_b)) {
       first = pos_a;

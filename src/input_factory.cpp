@@ -9,19 +9,19 @@ EdgeMap InputFactory::get_initial_configuration() {
 EdgeMap CollatzInputFactory::build_dummy_initial_configuration() {
   EdgeMap to_return;
 
-  std::vector<PosEdge> edges_to_add;
+  std::vector<EdgePosAndColor> edges_to_add;
 
-  edges_to_add.push_back(std::make_pair(OrderedPosCouple({0, 0}, {1, 0}),
-                                        std::make_pair(std::string("bin"), 0)));
+  edges_to_add.push_back(EdgePosAndColor(
+      OrderedPosCouple({0, 0}, {1, 0}), std::make_pair(std::string("bin"), 0)));
 
-  edges_to_add.push_back(std::make_pair(OrderedPosCouple({1, 0}, {1, 1}),
-                                        std::make_pair(std::string("ter"), 1)));
+  edges_to_add.push_back(EdgePosAndColor(
+      OrderedPosCouple({1, 0}, {1, 1}), std::make_pair(std::string("ter"), 1)));
 
-  edges_to_add.push_back(std::make_pair(OrderedPosCouple({1, 1}, {0, 1}),
-                                        std::make_pair(std::string("bin"), 1)));
+  edges_to_add.push_back(EdgePosAndColor(
+      OrderedPosCouple({1, 1}, {0, 1}), std::make_pair(std::string("bin"), 1)));
 
-  for (const PosEdge& pos_and_edge : edges_to_add) {
-    to_return[pos_and_edge.first] = pos_and_edge.second;
+  for (const EdgePosAndColor& edge : edges_to_add) {
+    to_return[edge.pos] = edge.color;
   }
 
   return to_return;

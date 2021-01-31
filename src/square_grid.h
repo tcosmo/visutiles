@@ -22,3 +22,33 @@
 #define SQUARE_GRID_DIR \
   { WORLD_WEST, WORLD_SOUTH, WORLD_EAST, WORLD_NORTH }
 #define SQUARE_GRID_NEIGHBORING_SIZE 4
+
+// This function returns the coordinates of the tiles separated by a give edge
+// on the square grid
+static std::array<sf::Vector2i, 2> square_grid_tiles_pos_from_edge_pos(
+    const OrderedPosCouple& pos_couple) {
+  sf::Vector2i vect = pos_couple.get_vector();
+
+  if (vect == WORLD_NORTH) {
+    return {pos_couple.first, pos_couple.first + WORLD_EAST};
+  } else if (vect == WORLD_EAST) {
+    return {pos_couple.second, pos_couple.second + WORLD_SOUTH};
+  } else {
+    fatal_error_log(
+        "An invalid edge was given on the square grid. Here's the edges's "
+        "vector: (%d,%d). Abort.\n",
+        vect.x, vect.y);
+  }
+}
+
+// Returns the set of edges for a tile position on the square grid in order
+// West, South, East, North
+static std::array<OrderedPosCouple, 4> square_grid_edges_pos_from_tile_pos(
+    const sf::Vector2i& tile_pos) {
+  return {OrderedPosCouple(tile_pos + WORLD_WEST,
+                           tile_pos + WORLD_WEST + WORLD_NORTH),
+          OrderedPosCouple(tile_pos, tile_pos + WORLD_WEST),
+          OrderedPosCouple(tile_pos, tile_pos + WORLD_NORTH),
+          OrderedPosCouple(tile_pos + WORLD_NORTH + WORLD_WEST,
+                           tile_pos + WORLD_NORTH)};
+}

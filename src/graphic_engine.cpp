@@ -18,7 +18,6 @@ void GraphicEngine::print_simulation_report() {
   printf("      - Uncompleted tiles: %zu\n", world.uncompleted_tile_count());
   printf("      - Completed tiles: %zu\n", world.completed_tile_count());
   printf("      - Dead tiles: %zu\n", world.dead_tile_count());
-  printf("      - Versa tiles: %zu\n", world.versa_tile_count());
 
   printf("\n   == Graphics ==\n");
 

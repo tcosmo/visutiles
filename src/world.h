@@ -9,7 +9,24 @@
 typedef std::map<sf::Vector2i, TileName, CompareTilesPositions> TileMap;
 typedef std::map<OrderedPosCouple, EdgeColor, CompareOrderedPosCouple> EdgeMap;
 
-typedef std::pair<OrderedPosCouple, EdgeColor> PosEdge;
+struct EdgePosAndColor {
+  OrderedPosCouple pos;
+  EdgeColor color;
+
+  EdgePosAndColor(const OrderedPosCouple& pos, const EdgeColor& color)
+      : pos(pos), color(color) {}
+
+  EdgePosAndColor(
+      const std::pair<const OrderedPosCouple, EdgeColor>& pos_and_color) {
+    pos = pos_and_color.first;
+    color = pos_and_color.second;
+  }
+};
+
+struct TilePosAndName {
+  sf::Vector2i pos;
+  TileName name;
+};
 
 // The world consists in an assembly (non necessarily connected) of tiles on
 // the square grid. Each position can hold exactly one tile.
@@ -21,43 +38,78 @@ class World {
   void set_edges(EdgeMap p_edges);
   const EdgeMap& get_edges() { return edges; }
 
-  const std::vector<PosEdge>& get_newly_added_edges() const {
-    return newly_added_edges;
-  }
-
   void update();
 
   size_t edge_count() const { return edges.size(); }
 
   size_t completed_tile_count() const { return completed_tiles.size(); }
-  size_t uncompleted_tile_count() const { return uncompleted_tiles.size(); }
-  size_t dead_tile_count() const { return dead_tiles.size(); }
-  size_t versa_tile_count() const { return versa_tiles.size(); }
+  size_t uncompleted_tile_count() const { return uncompleted_tiles_pos.size(); }
+  size_t dead_tile_count() const { return dead_tiles_pos.size(); }
 
   Tileset& tileset;  // not const because of query memoization
+
+  /* To be used by view */
+  const std::vector<EdgePosAndColor>& get_newly_added_edges() const {
+    return newly_added_edges;
+  }
+
+  const std::vector<TilePosAndName>& get_newly_added_completed_tiles() const {
+    return newly_completed_tiles;
+  }
+
+  const PosVec& get_newly_added_dead_tiles_pos() const {
+    return newly_dead_tiles_pos;
+  }
+
+  const PosSet& get_newly_added_uncompleted_tiles_pos() const {
+    return newly_uncompleted_tiles_pos;
+  }
 
  private:
   EdgeMap edges;
 
-  std::vector<PosEdge> newly_added_edges;
+  // Contains the position of the tiles that were spawned so far.
+  // A tile is spawned when at least one of its 4 edges is put into existence.
+  PosSet spawned_tiles_pos;
 
+  // Completed tiles are tiles with exactly 1 solution to their Wang colors
   TileMap completed_tiles;
 
-  // Uncompleted tiles are tiles with < 4 edges and no solution yet
-  // to their Wang colors
-  PosSet uncompleted_tiles;
+  // Uncompleted tiles are tiles with at least 2 solutions to their Wang colors
+  // This invariant is not always maintained as an update step might be
+  // necessary in order to realise that a given tile is in fact dead or complete
+  PosSet uncompleted_tiles_pos;
   // Dead tiles are tiles with no solution at all to their Wang colors
-  PosVec dead_tiles;
+  PosSet dead_tiles_pos;
 
-  // Versa tiles are tiles with multiple solutions to their Wang colors
-  // we store the number of solutions in the second elem of the pair
-  std::vector<std::pair<sf::Vector2i, size_t>> versa_tiles;
+  std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE>
+  get_edges_colors_at_tile_pos(const sf::Vector2i& tile_pos);
+  void add_edge_if_not_present(const EdgePosAndColor& edge);
 
-  void remove_completed_and_dead_tiles();
-  bool is_tile_completed(const sf::Vector2i& tile_pos);
-  std::vector<TileName> Wang_query_for_tile_pos(const sf::Vector2i& tile_pos);
-  void add_edges_for_tile(const sf::Vector2i& tile_pos, TileName tile_name);
-  void add_tiles_for_newly_added_edges();
+  void spawn_tile_pos(const sf::Vector2i& tile_pos) {
+    spawned_tiles_pos.insert(tile_pos);
+    uncompleted_tiles_pos.insert(tile_pos);
+    newly_uncompleted_tiles_pos.insert(tile_pos);
+  };
 
+  void print_edge(const EdgePosAndColor& edge);
   void print_all_edges();
+
+  /* The following is for view exposure */
+  std::vector<EdgePosAndColor>
+      newly_added_edges;  // vector and not set because protected of redundancy
+                          // by edges map
+  std::vector<TilePosAndName>
+      newly_completed_tiles;  // vector and not set because protected of
+                              // redundancy as we fill it by iterating tiles by
+                              // tiles
+
+  PosVec newly_dead_tiles_pos;  // vector and not set because protected of
+                                // redundancy as we fill it by iterating tiles
+                                // by tiles
+
+  PosSet newly_uncompleted_tiles_pos;  // set because possible redundancy at
+                                       // insert time
+
+  void clear_view_buffers();
 };

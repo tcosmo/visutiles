@@ -8,8 +8,9 @@ Tileset::Tileset(std::string json_file_dir, std::string json_filename)
   parse_json_file();
 }
 
-bool edge_constraints_satisfied(const std::array<EdgeColor, 4>& constraint,
-                                const std::array<EdgeColor, 4>& tile_spec) {
+bool edge_constraints_satisfied_by_tile(
+    const std::array<EdgeColor, 4>& constraint,
+    const std::array<EdgeColor, 4>& tile_spec) {
   for (size_t i_dir = 0; i_dir < SQUARE_GRID_NEIGHBORING_SIZE; i_dir += 1) {
     if (constraint[i_dir] == ANY_EDGE_COLOR) continue;
     if (constraint[i_dir] != tile_spec[i_dir]) return false;
@@ -17,21 +18,27 @@ bool edge_constraints_satisfied(const std::array<EdgeColor, 4>& constraint,
   return true;
 }
 
-std::vector<TileName> Tileset::Wang_query(
+PossibleEdgesColorsAndTilesNames Tileset::Wang_query(
     std::array<EdgeColor, 4> edge_constraints) {
   if (memoize_queries.find(edge_constraints) != memoize_queries.end()) {
     return memoize_queries[edge_constraints];
   }
 
-  std::vector<TileName> to_return;
+  std::array<ColorSet, SQUARE_GRID_NEIGHBORING_SIZE> edges_color_to_return;
+  std::vector<TileName> tiles_to_return;
 
   for (const std::pair<TileName, std::array<EdgeColor, 4>>& name_and_spec :
        tile_specification) {
-    if (edge_constraints_satisfied(edge_constraints, name_and_spec.second)) {
-      to_return.push_back(name_and_spec.first);
+    if (edge_constraints_satisfied_by_tile(edge_constraints,
+                                           name_and_spec.second)) {
+      tiles_to_return.push_back(name_and_spec.first);
+      for (size_t i_dir = 0; i_dir < SQUARE_GRID_NEIGHBORING_SIZE; i_dir += 1)
+        edges_color_to_return[i_dir].insert(name_and_spec.second[i_dir]);
     }
   }
 
+  PossibleEdgesColorsAndTilesNames to_return =
+      std::make_pair(edges_color_to_return, tiles_to_return);
   memoize_queries[edge_constraints] = to_return;
   return to_return;
 }

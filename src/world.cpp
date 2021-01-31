@@ -2,168 +2,102 @@
 
 World::World(Tileset& tileset) : tileset(tileset) {}
 
-// This function returns the coordinates of the tiles separated by a give edge
-// on the square grid
-std::array<sf::Vector2i, 2> square_grid_tiles_from_edge(
-    const OrderedPosCouple& pos_couple) {
-  sf::Vector2i vect = pos_couple.get_vector();
-
-  if (vect == WORLD_NORTH) {
-    return {pos_couple.first, pos_couple.first + WORLD_EAST};
-  } else if (vect == WORLD_EAST) {
-    return {pos_couple.second, pos_couple.second + WORLD_SOUTH};
-  } else {
-    fatal_error_log(
-        "An invalid edge was given on the square grid. Here's the edges's "
-        "vector: (%d,%d). Abort.\n",
-        vect.x, vect.y);
-  }
+void World::print_edge(const EdgePosAndColor& edge) {
+  printf("\t(%d,%d) (%d,%d) (%s,%d)\n", edge.pos.first.x, edge.pos.first.y,
+         edge.pos.second.x, edge.pos.second.y, edge.color.first.c_str(),
+         edge.color.second);
 }
 
-// Returns the set of edges for a tile on the square grid in order
-// West, South, East, North
-std::array<OrderedPosCouple, 4> square_grid_edges_from_tile(
-    const sf::Vector2i& tile_pos) {
-  return {OrderedPosCouple(tile_pos + WORLD_WEST,
-                           tile_pos + WORLD_WEST + WORLD_NORTH),
-          OrderedPosCouple(tile_pos, tile_pos + WORLD_WEST),
-          OrderedPosCouple(tile_pos, tile_pos + WORLD_NORTH),
-          OrderedPosCouple(tile_pos + WORLD_NORTH + WORLD_WEST,
-                           tile_pos + WORLD_NORTH)};
-}
 void World::print_all_edges() {
-  for (const PosEdge& edge : edges) {
-    printf("\t(%d,%d) (%d,%d) (%s,%d)\n", edge.first.first.x,
-           edge.first.first.y, edge.first.second.x, edge.first.second.y,
-           edge.second.first.c_str(), edge.second.second);
+  for (const EdgePosAndColor& edge : edges) {
+    print_edge(edge);
   }
 }
+
 void World::set_edges(EdgeMap p_edges) {
-  edges = std::move(p_edges);
-  print_all_edges();
-
-  for (const PosEdge& pos_edge : edges) {
-    newly_added_edges.push_back(pos_edge);
+  for (const EdgePosAndColor& edge : p_edges) {
+    add_edge_if_not_present(edge);
   }
-
-  // Insert tiles corresponding to edges
-  add_tiles_for_newly_added_edges();
 }
 
-void World::add_tiles_for_newly_added_edges() {
-  for (const PosEdge& pos_edge : newly_added_edges) {
-    for (const sf::Vector2i& tile_pos :
-         square_grid_tiles_from_edge(pos_edge.first)) {
-      uncompleted_tiles.insert(tile_pos);
-    }
+std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE>
+World::get_edges_colors_at_tile_pos(const sf::Vector2i& tile_pos) {
+  std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE> to_return;
+
+  std::array<OrderedPosCouple, 4> edges_pos =
+      square_grid_edges_pos_from_tile_pos(tile_pos);
+
+  for (size_t i_dir = 0; i_dir < SQUARE_GRID_NEIGHBORING_SIZE; i_dir += 1) {
+    EdgeColor color = ANY_EDGE_COLOR;
+    if (edges.find(edges_pos[i_dir]) != edges.end())
+      color = edges[edges_pos[i_dir]];
+    to_return[i_dir] = color;
   }
 
-  remove_completed_and_dead_tiles();
+  return to_return;
 }
-// Add the edges of tile specification `tile_name` at position `tile_pos`
-void World::add_edges_for_tile(const sf::Vector2i& tile_pos,
-                               TileName tile_name) {
-  std::array<OrderedPosCouple, 4> edges_pos_of_tile =
-      square_grid_edges_from_tile(tile_pos);
 
-  size_t i_dir = 0;
-  for (const OrderedPosCouple& edge_pos : edges_pos_of_tile) {
-    if (edges.find(edge_pos) == edges.end()) {
-      edges[edge_pos] = tileset.get_tile_spec(tile_name)[i_dir];
+void World::add_edge_if_not_present(const EdgePosAndColor& edge) {
+  if (edges.find(edge.pos) != edges.end()) return;
 
-      newly_added_edges.push_back(std::make_pair(edge_pos, edges[edge_pos]));
-    } else {
-      assert(edges[edge_pos] ==
-             tileset.get_tile_spec(tile_name)[i_dir]);  // asset no mismatches
-    }
-    i_dir += 1;
+  edges[edge.pos] = edge.color;
+  newly_added_edges.push_back(edge);
+
+  for (const sf::Vector2i& tile_pos :
+       square_grid_tiles_pos_from_edge_pos(edge.pos)) {
+    spawn_tile_pos(tile_pos);
   }
+}
+
+void World::clear_view_buffers() {
+  newly_added_edges.clear();
+  newly_completed_tiles.clear();
+  newly_dead_tiles_pos.clear();
+  newly_uncompleted_tiles_pos.clear();
 }
 
 // World update step: add edges of tiles that can be determined from their
 // current constraints
 void World::update() {
-  newly_added_edges.clear();
+  clear_view_buffers();
 
-  std::vector<sf::Vector2i> to_remove;
-  for (const sf::Vector2i& tile_pos : uncompleted_tiles) {
-    printf("(%d, %d):\n", tile_pos.x, tile_pos.y);
-    std::vector<TileName> Wang_query_result = Wang_query_for_tile_pos(tile_pos);
-    printf("%d\n", Wang_query_result.size());
-    if (Wang_query_result.size() > 1) continue;
+  std::vector<sf::Vector2i> to_remove_from_uncompleted_tiles_pos;
 
-    if (Wang_query_result.size() == 0) {
-      dead_tiles.push_back(tile_pos);
-    } else {
-      add_edges_for_tile(tile_pos, Wang_query_result[0]);
-      completed_tiles[tile_pos] = Wang_query_result[0];
+  for (const sf::Vector2i& tile_pos : uncompleted_tiles_pos) {
+    std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE> tile_edges_colors =
+        get_edges_colors_at_tile_pos(tile_pos);
+    std::array<OrderedPosCouple, SQUARE_GRID_NEIGHBORING_SIZE> tile_edges_pos =
+        square_grid_edges_pos_from_tile_pos(tile_pos);
+
+    PossibleEdgesColorsAndTilesNames query_result =
+        tileset.Wang_query(tile_edges_colors);
+
+    // Add edges when they are the unique solution to Wang constraints
+    for (size_t i_dir = 0; i_dir < SQUARE_GRID_NEIGHBORING_SIZE; i_dir += 1) {
+      if (query_result.first[i_dir].size() == 1) {
+        add_edge_if_not_present(EdgePosAndColor(
+            {tile_edges_pos[i_dir], *query_result.first[i_dir].begin()}));
+      }
     }
 
-    to_remove.push_back(tile_pos);
-  }
-
-  for (const sf::Vector2i& tile_pos : to_remove) {
-    uncompleted_tiles.erase(tile_pos);
-  }
-
-  add_tiles_for_newly_added_edges();
-  printf("\n\n");
-}
-
-// Decides if a given tiles has all its edges
-bool World::is_tile_completed(const sf::Vector2i& tile_pos) {
-  for (const OrderedPosCouple& edge : square_grid_edges_from_tile(tile_pos)) {
-    if (edges.find(edge) == edges.end()) return false;
-  }
-
-  return true;
-}
-
-std::vector<TileName> World::Wang_query_for_tile_pos(
-    const sf::Vector2i& tile_pos) {
-  // for (const PosEdge& pos_edge : edges) {
-  //   printf("Edge (%d %d) (%d %d) (%s %d)\n", pos_edge.first.first.x,
-  //          pos_edge.first.first.y, pos_edge.first.second.x,
-  //          pos_edge.first.second.y, pos_edge.second.first.c_str(),
-  //          pos_edge.second.second);
-  // }
-
-  std::array<EdgeColor, 4> Wang_constraint;
-  int i_edge = 0;
-  for (const OrderedPosCouple& edge : square_grid_edges_from_tile(tile_pos)) {
-    Wang_constraint[i_edge] = ANY_EDGE_COLOR;
-    if (edges.find(edge) != edges.end()) {
-      Wang_constraint[i_edge] = edges[edge];
-    }
-    printf("\t(%d,%d) (%d,%d) (%s,%d)\n", edge.first.x, edge.first.y,
-           edge.second.x, edge.second.y, Wang_constraint[i_edge].first.c_str(),
-           Wang_constraint[i_edge].second);
-    i_edge += 1;
-  }
-  return tileset.Wang_query(Wang_constraint);
-}
-
-// This routine goes through the uncompleted tiles
-// and remove the completed or deads ones (i.e. tiles with all their edges)
-void World::remove_completed_and_dead_tiles() {
-  PosVec to_remove;
-  for (const sf::Vector2i& tile_pos : uncompleted_tiles) {
-    if (is_tile_completed(tile_pos)) {
-      to_remove.push_back(tile_pos);
-    }
-  }
-  for (const sf::Vector2i& tile_pos : to_remove) {
-    std::vector<TileName> candidate_tiles = Wang_query_for_tile_pos(tile_pos);
-
-    if (candidate_tiles.size() == 0)
-      dead_tiles.push_back(tile_pos);
-    else {
-      assert(candidate_tiles.size() ==
-             1);  // tile is completed (4 edges are set) so at most 1 choice
-      completed_tiles[tile_pos] = candidate_tiles[0];
+    // If only one tile is solution we record the tile as complete
+    if (query_result.second.size() == 1) {
+      completed_tiles[tile_pos] = query_result.second[0];
+      to_remove_from_uncompleted_tiles_pos.push_back(tile_pos);
+      newly_completed_tiles.push_back(
+          TilePosAndName({tile_pos, query_result.second[0]}));
     }
 
-    uncompleted_tiles.erase(tile_pos);
+    // If no tile is solution we record the tile as dead
+    if (query_result.second.size() == 0) {
+      dead_tiles_pos.insert(tile_pos);
+      to_remove_from_uncompleted_tiles_pos.push_back(tile_pos);
+      newly_dead_tiles_pos.push_back(tile_pos);
+    }
+  }
+
+  for (const sf::Vector2i& tile_pos : to_remove_from_uncompleted_tiles_pos) {
+    uncompleted_tiles_pos.erase(tile_pos);
   }
 }
 

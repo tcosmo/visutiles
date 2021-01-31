@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
@@ -19,13 +20,30 @@ typedef char TileName;
 typedef std::pair<std::string, int> EdgeColor;
 static const std::pair<std::string, int> ANY_EDGE_COLOR = {"", -1};
 
+struct CompareEdgeColors {
+  bool operator()(const EdgeColor& a, const EdgeColor& b) const {
+    if (a.first != b.first)
+      return std::lexicographical_compare(a.first.begin(), a.first.end(),
+                                          b.first.begin(), b.first.end());
+    return a.second < b.second;
+  }
+};
+
+typedef std::set<EdgeColor, CompareEdgeColors> ColorSet;
+
+typedef std::pair<std::array<ColorSet, SQUARE_GRID_NEIGHBORING_SIZE>,
+                  std::vector<TileName>>
+    PossibleEdgesColorsAndTilesNames;
+
 class Tileset {
  public:
   Tileset(std::string json_file_dir, std::string json_filename);
   ~Tileset();
 
-  // Return the set of tiles satisfying some given edge colors constraints
-  std::vector<TileName> Wang_query(std::array<EdgeColor, 4> edge_constraints);
+  // Return the set of possible edge colors and corresponding tile names
+  // given a set of edge constraints
+  PossibleEdgesColorsAndTilesNames Wang_query(
+      std::array<EdgeColor, 4> edge_constraints);
 
   void print_edge_color(const EdgeColor& c) {
     printf("%s, `%c`\n", c.first.c_str(), alphabet[c.first][c.second]);
@@ -51,7 +69,8 @@ class Tileset {
   std::string json_file_dir;
   std::string json_filename;
 
-  std::map<std::array<EdgeColor, 4>, std::vector<TileName>> memoize_queries;
+  std::map<std::array<EdgeColor, 4>, PossibleEdgesColorsAndTilesNames>
+      memoize_queries;
 
   void parse_json_file();
 

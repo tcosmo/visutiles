@@ -27,8 +27,10 @@ class WorldView : public sf::Drawable, public sf::Transformable {
   sf::VertexBuffer vertex_buffer;
   size_t vertex_count;
 
-  std::array<sf::Vertex, 4> get_edge_vertices(const PosEdge& pos_and_edge);
-  std::array<sf::Vertex, 4> get_edge_char_vertices(const PosEdge& pos_and_edge);
+  std::array<sf::Vertex, 4> get_edge_vertices(
+      const EdgePosAndColor& pos_and_edge);
+  std::array<sf::Vertex, 4> get_edge_char_vertices(
+      const EdgePosAndColor& pos_and_edge);
 
   sf::Vector2f world_pos_to_screen_pos(const sf::Vector2i& pos);
 

@@ -20,9 +20,9 @@ sf::Vector2f WorldView::world_pos_to_screen_pos(const sf::Vector2i& pos) {
 }
 
 std::array<sf::Vertex, 4> WorldView::get_edge_vertices(
-    const PosEdge& pos_and_edge) {
-  sf::Vector2i point_A = pos_and_edge.first.first;
-  sf::Vector2i point_B = pos_and_edge.first.second;
+    const EdgePosAndColor& edge) {
+  sf::Vector2i point_A = edge.pos.first;
+  sf::Vector2i point_B = edge.pos.second;
 
   sf::Vector2f screen_point_A = world_pos_to_screen_pos(point_A);
   sf::Vector2f screen_point_B = world_pos_to_screen_pos(point_B);
@@ -47,19 +47,19 @@ std::array<sf::Vertex, 4> WorldView::get_edge_vertices(
   quad[2].texCoords = {0, 0};
   quad[3].texCoords = {0, 0};
 
-  quad[0].color = alphabet_color[pos_and_edge.second.first];
-  quad[1].color = alphabet_color[pos_and_edge.second.first];
-  quad[2].color = alphabet_color[pos_and_edge.second.first];
-  quad[3].color = alphabet_color[pos_and_edge.second.first];
+  quad[0].color = alphabet_color[edge.color.first];
+  quad[1].color = alphabet_color[edge.color.first];
+  quad[2].color = alphabet_color[edge.color.first];
+  quad[3].color = alphabet_color[edge.color.first];
 
   return quad;
 }
 
 std::array<sf::Vertex, 4> WorldView::get_edge_char_vertices(
-    const PosEdge& pos_and_edge) {
+    const EdgePosAndColor& edge) {
   std::array<sf::Vertex, 4> text_quad;
-  sf::Vector2i point_A = pos_and_edge.first.first;
-  sf::Vector2i point_B = pos_and_edge.first.second;
+  sf::Vector2i point_A = edge.pos.first;
+  sf::Vector2i point_B = edge.pos.second;
 
   sf::Vector2f screen_point_A = world_pos_to_screen_pos(point_A);
   sf::Vector2f screen_point_B = world_pos_to_screen_pos(point_B);
@@ -69,7 +69,7 @@ std::array<sf::Vertex, 4> WorldView::get_edge_char_vertices(
   sf::Vector2f normal_vect = get_normal_unit_vector(vect);
 
   // define text
-  char edge_char = tileset.get_edge_char(pos_and_edge.second);
+  char edge_char = tileset.get_edge_char(edge.color);
   sf::Glyph glyph = font.getGlyph(edge_char, GRAPHIC_EDGE_TEXT_SIZE, false);
 
   // Centering text on edge
@@ -100,23 +100,23 @@ std::array<sf::Vertex, 4> WorldView::get_edge_char_vertices(
 }
 
 void WorldView::update() {
-  const std::vector<PosEdge> newly_added_edges = world.get_newly_added_edges();
+  const std::vector<EdgePosAndColor> newly_added_edges =
+      world.get_newly_added_edges();
   if (newly_added_edges.size() == 0) return;
 
   std::vector<sf::Vertex> vertices_to_add;
-  for (const PosEdge& pos_and_edge : newly_added_edges) {
-    OrderedPosCouple edge = pos_and_edge.first;
-    if (edge_seen.find(edge) != edge_seen.end()) {
+  for (const EdgePosAndColor& edge : newly_added_edges) {
+    if (edge_seen.find(edge.pos) != edge_seen.end()) {
       warning_log("Edge {(%d,%d),(%d,%d)} has already be drawn in the past.\n",
-                  edge.first.x, edge.first.y, edge.second.x, edge.second.y);
+                  edge.pos.first.x, edge.pos.first.y, edge.pos.second.x,
+                  edge.pos.second.y);
     }
-    edge_seen[edge] = true;
+    edge_seen[edge.pos] = true;
 
-    std::array<sf::Vertex, 4> edge_vertices = get_edge_vertices(pos_and_edge);
+    std::array<sf::Vertex, 4> edge_vertices = get_edge_vertices(edge);
     for (const sf::Vertex& v : edge_vertices) vertices_to_add.push_back(v);
 
-    std::array<sf::Vertex, 4> edge_char_vertices =
-        get_edge_char_vertices(pos_and_edge);
+    std::array<sf::Vertex, 4> edge_char_vertices = get_edge_char_vertices(edge);
     for (const sf::Vertex& v : edge_char_vertices) vertices_to_add.push_back(v);
   }
 

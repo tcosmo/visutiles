@@ -17,4 +17,4 @@
 // Maximum number of vertices that can be drawn simultaneously on the screen
 // Divide by 4 to get the corresponding number of tiles for square tiles with
 // 4 vertices.
-#define VERTEX_BUFFER_MAX_SIZE 12000000
+#define VERTEX_BUFFER_MAX_SIZE 20000
