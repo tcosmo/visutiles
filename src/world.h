@@ -48,6 +48,16 @@ class World {
 
   Tileset& tileset;  // not const because of query memoization
 
+  void reset() {
+    edges.clear();
+    spawned_tiles_pos.clear();
+    completed_tiles.clear();
+    uncompleted_tiles_pos.clear();
+    dead_tiles_pos.clear();
+    clear_view_buffers();
+    set_edges(input_edges);
+  }
+
   /* To be used by view */
   const std::vector<EdgePosAndColor>& get_newly_added_edges() const {
     return newly_added_edges;
@@ -67,6 +77,7 @@ class World {
 
  private:
   EdgeMap edges;
+  EdgeMap input_edges;
 
   // Contains the position of the tiles that were spawned so far.
   // A tile is spawned when at least one of its 4 edges is put into existence.

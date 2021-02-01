@@ -15,6 +15,7 @@ void World::print_all_edges() {
 }
 
 void World::set_edges(EdgeMap p_edges) {
+  input_edges = p_edges;
   for (const EdgePosAndColor& edge : p_edges) {
     add_edge_if_not_present(edge);
   }
@@ -62,6 +63,7 @@ void World::update() {
   clear_view_buffers();
 
   std::vector<sf::Vector2i> to_remove_from_uncompleted_tiles_pos;
+  std::vector<EdgePosAndColor> edges_to_add;
 
   for (const sf::Vector2i& tile_pos : uncompleted_tiles_pos) {
     std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE> tile_edges_colors =
@@ -75,7 +77,7 @@ void World::update() {
     // Add edges when they are the unique solution to Wang constraints
     for (size_t i_dir = 0; i_dir < SQUARE_GRID_NEIGHBORING_SIZE; i_dir += 1) {
       if (query_result.first[i_dir].size() == 1) {
-        add_edge_if_not_present(EdgePosAndColor(
+        edges_to_add.push_back(EdgePosAndColor(
             {tile_edges_pos[i_dir], *query_result.first[i_dir].begin()}));
       }
     }
@@ -94,6 +96,10 @@ void World::update() {
       to_remove_from_uncompleted_tiles_pos.push_back(tile_pos);
       newly_dead_tiles_pos.push_back(tile_pos);
     }
+  }
+
+  for (const EdgePosAndColor& edge : edges_to_add) {
+    add_edge_if_not_present(edge);
   }
 
   for (const sf::Vector2i& tile_pos : to_remove_from_uncompleted_tiles_pos) {

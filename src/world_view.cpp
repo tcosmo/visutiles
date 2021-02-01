@@ -6,12 +6,23 @@ WorldView::WorldView(const Tileset& tileset, const World& world,
   vertex_buffer.setPrimitiveType(sf::Quads);
   vertex_buffer.setUsage(sf::VertexBuffer::Usage::Dynamic);
   vertex_buffer.create(VERTEX_BUFFER_MAX_SIZE);
+
   vertex_count = 0;
 
   for (size_t i_alphabet = 0; i_alphabet < tileset.get_alphabet_names().size();
        i_alphabet += 1)
     alphabet_color[tileset.get_alphabet_names()[i_alphabet]] =
         COLOR_WHEEL[i_alphabet % COLOR_WHEEL.size()];
+}
+
+void WorldView::reset_vertex_buffer() {
+  sf::VertexBuffer tmp_vertex_buffer;
+  tmp_vertex_buffer.setPrimitiveType(sf::Quads);
+  tmp_vertex_buffer.setUsage(sf::VertexBuffer::Usage::Dynamic);
+  tmp_vertex_buffer.create(VERTEX_BUFFER_MAX_SIZE);
+
+  vertex_buffer.update(tmp_vertex_buffer);
+  vertex_count = 0;
 }
 
 sf::Vector2f WorldView::world_pos_to_screen_pos(const sf::Vector2i& pos) {

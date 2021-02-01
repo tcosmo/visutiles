@@ -20,6 +20,11 @@ class WorldView : public sf::Drawable, public sf::Transformable {
 
   size_t get_vertex_count() { return vertex_count; };
 
+  void reset() {
+    reset_vertex_buffer();
+    edge_seen.clear();
+  }
+
  private:
   const Tileset& tileset;
   const World& world;
@@ -40,4 +45,6 @@ class WorldView : public sf::Drawable, public sf::Transformable {
 
   std::map<EdgeAlphabetName, sf::Color> alphabet_color;
   const sf::Font& font;
+
+  void reset_vertex_buffer();
 };

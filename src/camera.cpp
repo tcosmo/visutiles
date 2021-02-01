@@ -41,10 +41,6 @@ void GraphicEngine::handle_camera_events(const sf::Event& event) {
         camera_center();
         break;
 
-      case sf::Keyboard::R:
-        camera_reset();
-        break;
-
       case sf::Keyboard::Up:
         camera_translate(sf::Vector2f(VIEW_NORTH) *
                          camera_params.default_trans_vec);

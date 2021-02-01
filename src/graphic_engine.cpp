@@ -56,6 +56,12 @@ void GraphicEngine::run() {
             world_view.update();
             break;
 
+          case sf::Keyboard::R:
+            world.reset();
+            world_view.reset();
+            world_view.update();
+            break;
+
           case sf::Keyboard::Escape:
             window.close();
             break;
