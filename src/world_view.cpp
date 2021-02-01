@@ -77,7 +77,7 @@ std::array<sf::Vertex, 4> WorldView::get_edge_char_vertices(
 
   sf::Vector2f vect = screen_point_B - screen_point_A;
   vect /= Euclidean_norm(vect);
-  sf::Vector2f normal_vect = get_normal_unit_vector(vect);
+  sf::Vector2f normal_vect = -1 * get_normal_unit_vector(vect);
 
   // define text
   char edge_char = tileset.get_edge_char(edge.color);
@@ -85,7 +85,7 @@ std::array<sf::Vertex, 4> WorldView::get_edge_char_vertices(
 
   // Centering text on edge
   sf::Vector2f mid_point =
-      (screen_point_A + screen_point_B + GRAPHIC_EDGE_THICK * normal_vect) *
+      (screen_point_A + screen_point_B - GRAPHIC_EDGE_THICK * normal_vect) *
       (float)0.5;
   text_quad[0].position = mid_point -
                           glyph.bounds.height * (normal_vect * (float)0.5) -
