@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
   w_view.update();
 
   // Simulation engine
-  GraphicEngine engine(w, w_view, Collatz_tileset, 1200, 800);
+  GraphicEngine engine(w, w_view, Collatz_tileset, 1350, 900);
   engine.run();
 
   return 0;

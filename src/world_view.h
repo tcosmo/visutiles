@@ -14,10 +14,12 @@ const static size_t GRAPHIC_TILE_TEXT_SIZE = GRAPHIC_EDGE_WIDTH / 2;
 const static size_t GRAPHIC_EDGE_TEXT_SIZE = GRAPHIC_EDGE_WIDTH / 3;
 
 // Layers
-const static size_t NB_GRAPHIC_LAYERS = 3;
-const static size_t LAYER_EDGES = 0;
-const static size_t LAYER_TILES = 1;
-const static size_t LAYER_ADDITIONAL_TILES = 2;
+const static size_t NB_GRAPHIC_LAYERS = 4;
+const static size_t LAYER_TILES_COLORS =
+    0;  // Fill tiles with colors instead of text
+const static size_t LAYER_EDGES = 1;
+const static size_t LAYER_TILES = 2;
+const static size_t LAYER_ADDITIONAL_TILES = 3;  // Dead tiles, versa tiles
 
 class WorldView : public sf::Drawable, public sf::Transformable {
  public:
@@ -33,6 +35,8 @@ class WorldView : public sf::Drawable, public sf::Transformable {
   void reset() {
     reset_vertex_buffer();
     edge_seen.clear();
+    tile_seen.clear();
+    tile_color_seen.clear();
   }
 
  private:
@@ -48,6 +52,7 @@ class WorldView : public sf::Drawable, public sf::Transformable {
       const EdgePosAndColor& pos_and_edge);
 
   std::array<sf::Vertex, 4> get_tile_char_vertices(const TilePosAndName& tile);
+  std::array<sf::Vertex, 4> get_tile_color_vertices(const TilePosAndName& tile);
 
   sf::Vector2f world_pos_to_screen_pos(const sf::Vector2i& pos);
 
@@ -55,6 +60,7 @@ class WorldView : public sf::Drawable, public sf::Transformable {
 
   std::map<OrderedPosCouple, bool, CompareOrderedPosCouple> edge_seen;
   std::map<sf::Vector2i, bool, CompareTilesPositions> tile_seen;
+  std::map<sf::Vector2i, bool, CompareTilesPositions> tile_color_seen;
 
   std::map<EdgeAlphabetName, sf::Color> alphabet_color;
   const sf::Font& font;
@@ -63,5 +69,6 @@ class WorldView : public sf::Drawable, public sf::Transformable {
                     const std::vector<sf::Vertex> vertices_to_add);
   void update_edges_layer();
   void update_tiles_layer();
+  void update_tiles_colors_layer();
   void reset_vertex_buffer();
 };

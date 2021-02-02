@@ -147,12 +147,28 @@ std::array<sf::Vertex, 4> WorldView::get_tile_char_vertices(
   char tile_char = tile.name;
   sf::Glyph glyph = font.getGlyph(tile_char, GRAPHIC_TILE_TEXT_SIZE, false);
 
+  sf::RectangleShape glyph_rectangle;
+  glyph_rectangle.setSize(
+      sf::Vector2f(glyph.bounds.width, glyph.bounds.height));
+  glyph_rectangle.setOrigin(glyph_rectangle.getSize() * (float)0.5);
+
+  sf::Vector2f tile_center =
+      (world_pos_to_screen_pos(tile.pos) +
+       world_pos_to_screen_pos(tile.pos + WORLD_NORTH + WORLD_WEST)) *
+      (float)0.5;
+  glyph_rectangle.setPosition(tile_center);
+
   std::array<sf::Vertex, 4> text_quad;
-  text_quad[0].position =
-      world_pos_to_screen_pos(tile.pos + WORLD_NORTH + WORLD_WEST);
-  text_quad[1].position = world_pos_to_screen_pos(tile.pos + WORLD_NORTH);
-  text_quad[2].position = world_pos_to_screen_pos(tile.pos);
-  text_quad[3].position = world_pos_to_screen_pos(tile.pos + WORLD_WEST);
+  sf::Vector2f top_left = {glyph_rectangle.getGlobalBounds().left,
+                           glyph_rectangle.getGlobalBounds().top};
+  text_quad[0].position = top_left;
+
+  text_quad[1].position =
+      top_left + glyph_rectangle.getSize() * sf::Vector2f({1, 0});
+  text_quad[2].position =
+      top_left + glyph_rectangle.getSize() * sf::Vector2f({1, 1});
+  text_quad[3].position =
+      top_left + glyph_rectangle.getSize() * sf::Vector2f({0, 1});
 
   sf::Vector2f top_left_text = {(float)glyph.textureRect.left,
                                 (float)glyph.textureRect.top};
@@ -191,6 +207,53 @@ void WorldView::update_tiles_layer() {
   update_layer(LAYER_TILES, vertices_to_add);
 }
 
+std::array<sf::Vertex, 4> WorldView::get_tile_color_vertices(
+    const TilePosAndName& tile) {
+  char tile_char = tile.name;
+  sf::Color tile_color =
+      COLOR_WHEEL_SECONDARY[(tile_char + 4) % COLOR_WHEEL_SECONDARY.size()];
+  tile_color.a = 120;
+  std::array<sf::Vertex, 4> text_quad;
+  text_quad[0].position = world_pos_to_screen_pos(tile.pos);
+
+  text_quad[1].position = world_pos_to_screen_pos(tile.pos + WORLD_NORTH);
+  text_quad[2].position =
+      world_pos_to_screen_pos(tile.pos + WORLD_NORTH + WORLD_WEST);
+  text_quad[3].position = world_pos_to_screen_pos(tile.pos + WORLD_WEST);
+
+  text_quad[0].color = tile_color;
+  text_quad[1].color = tile_color;
+
+  text_quad[2].color = tile_color;
+  text_quad[3].color = tile_color;
+
+  return text_quad;
+}
+
+// Update the layer responsible for tiles rendering in color mode
+void WorldView::update_tiles_colors_layer() {
+  const std::vector<TilePosAndName> newly_added_completed_tiles =
+      world.get_newly_added_completed_tiles();
+
+  if (newly_added_completed_tiles.size() == 0) return;
+
+  std::vector<sf::Vertex> vertices_to_add;
+  for (const TilePosAndName& tile : newly_added_completed_tiles) {
+    if (tile_color_seen.find(tile.pos) != tile_color_seen.end()) {
+      warning_log(
+          "Tile at position (%d,%d) has already be drawn in the past.\n",
+          tile.pos.x, tile.pos.y);
+    }
+    tile_color_seen[tile.pos] = true;
+
+    std::array<sf::Vertex, 4> tile_char_vertices =
+        get_tile_color_vertices(tile);
+    for (const sf::Vertex& v : tile_char_vertices) vertices_to_add.push_back(v);
+  }
+
+  update_layer(LAYER_TILES, vertices_to_add);
+}
+
 void WorldView::update_layer(size_t i_layer,
                              const std::vector<sf::Vertex> vertices_to_add) {
   if (i_layer >= NB_GRAPHIC_LAYERS) return;
@@ -212,6 +275,7 @@ void WorldView::update_layer(size_t i_layer,
 
 void WorldView::update() {
   update_edges_layer();
+  update_tiles_colors_layer();
   update_tiles_layer();
 }
 
