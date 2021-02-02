@@ -274,9 +274,9 @@ void WorldView::update_layer(size_t i_layer,
 }
 
 void WorldView::update() {
-  update_edges_layer();
   update_tiles_colors_layer();
   update_tiles_layer();
+  update_edges_layer();
 }
 
 void WorldView::draw(sf::RenderTarget& target, sf::RenderStates states) const {
