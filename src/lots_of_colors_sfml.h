@@ -1,3 +1,4 @@
+// Source: https://raw.githubusercontent.com/chrisBRN/Lots_Of_Colors/master/lots_of_colors_sfml.h
 #pragma once
 #include <SFML/Graphics.hpp>
 
