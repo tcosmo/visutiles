@@ -21,8 +21,8 @@ void GraphicEngine::print_simulation_report() {
 
   printf("\n   == Graphics ==\n");
 
-  printf("      - World vertex count: %zu/%d\n", world_view.get_vertex_count(),
-         VERTEX_BUFFER_MAX_SIZE);
+  printf("      - World vertex count: %zu/%d\n",
+         world_view.get_total_vertex_count(), VERTEX_BUFFER_MAX_SIZE);
 }
 
 bool GraphicEngine::is_ctrl_pressed() {

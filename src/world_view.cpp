@@ -3,11 +3,12 @@
 WorldView::WorldView(const Tileset& tileset, const World& world,
                      const sf::Font& font)
     : tileset(tileset), world(world), font(font) {
-  vertex_buffer.setPrimitiveType(sf::Quads);
-  vertex_buffer.setUsage(sf::VertexBuffer::Usage::Dynamic);
-  vertex_buffer.create(VERTEX_BUFFER_MAX_SIZE);
-
-  vertex_count = 0;
+  for (size_t i_layer = 0; i_layer < NB_GRAPHIC_LAYERS; i_layer += 1) {
+    vertex_buffers[i_layer].setPrimitiveType(sf::Quads);
+    vertex_buffers[i_layer].setUsage(sf::VertexBuffer::Usage::Dynamic);
+    vertex_buffers[i_layer].create(VERTEX_BUFFER_MAX_SIZE);
+    vertex_counts[i_layer] = 0;
+  }
 
   for (size_t i_alphabet = 0; i_alphabet < tileset.get_alphabet_names().size();
        i_alphabet += 1)
@@ -21,8 +22,10 @@ void WorldView::reset_vertex_buffer() {
   tmp_vertex_buffer.setUsage(sf::VertexBuffer::Usage::Dynamic);
   tmp_vertex_buffer.create(VERTEX_BUFFER_MAX_SIZE);
 
-  vertex_buffer.update(tmp_vertex_buffer);
-  vertex_count = 0;
+  for (size_t i_layer = 0; i_layer < NB_GRAPHIC_LAYERS; i_layer += 1) {
+    vertex_buffers[i_layer].update(tmp_vertex_buffer);
+    vertex_counts[i_layer] = 0;
+  }
 }
 
 sf::Vector2f WorldView::world_pos_to_screen_pos(const sf::Vector2i& pos) {
@@ -110,17 +113,21 @@ std::array<sf::Vertex, 4> WorldView::get_edge_char_vertices(
   return text_quad;
 }
 
-void WorldView::update() {
+// Update the layer responsible for edges rendering
+void WorldView::update_edges_layer() {
   const std::vector<EdgePosAndColor> newly_added_edges =
       world.get_newly_added_edges();
+
   if (newly_added_edges.size() == 0) return;
 
   std::vector<sf::Vertex> vertices_to_add;
   for (const EdgePosAndColor& edge : newly_added_edges) {
     if (edge_seen.find(edge.pos) != edge_seen.end()) {
-      warning_log("Edge {(%d,%d),(%d,%d)} has already be drawn in the past.\n",
-                  edge.pos.first.x, edge.pos.first.y, edge.pos.second.x,
-                  edge.pos.second.y);
+      warning_log(
+          "Edge at position {(%d,%d),(%d,%d)} has already be drawn in the "
+          "past.\n",
+          edge.pos.first.x, edge.pos.first.y, edge.pos.second.x,
+          edge.pos.second.y);
     }
     edge_seen[edge.pos] = true;
 
@@ -131,7 +138,65 @@ void WorldView::update() {
     for (const sf::Vertex& v : edge_char_vertices) vertices_to_add.push_back(v);
   }
 
-  if (vertex_count + vertices_to_add.size() > VERTEX_BUFFER_MAX_SIZE) {
+  update_layer(LAYER_EDGES, vertices_to_add);
+}
+
+std::array<sf::Vertex, 4> WorldView::get_tile_char_vertices(
+    const TilePosAndName& tile) {
+  // define text
+  char tile_char = tile.name;
+  sf::Glyph glyph = font.getGlyph(tile_char, GRAPHIC_TILE_TEXT_SIZE, false);
+
+  std::array<sf::Vertex, 4> text_quad;
+  text_quad[0].position =
+      world_pos_to_screen_pos(tile.pos + WORLD_NORTH + WORLD_WEST);
+  text_quad[1].position = world_pos_to_screen_pos(tile.pos + WORLD_NORTH);
+  text_quad[2].position = world_pos_to_screen_pos(tile.pos);
+  text_quad[3].position = world_pos_to_screen_pos(tile.pos + WORLD_WEST);
+
+  sf::Vector2f top_left_text = {(float)glyph.textureRect.left,
+                                (float)glyph.textureRect.top};
+  sf::Vector2f text_size_vec = {(float)glyph.textureRect.width,
+                                (float)glyph.textureRect.height};
+
+  text_quad[0].texCoords = top_left_text;
+  text_quad[1].texCoords = top_left_text + sf::Vector2f({1, 0}) * text_size_vec;
+
+  text_quad[2].texCoords = top_left_text + text_size_vec;
+  text_quad[3].texCoords = top_left_text + sf::Vector2f({0, 1}) * text_size_vec;
+
+  return text_quad;
+}
+
+// Update the layer responsible for tiles rendering
+void WorldView::update_tiles_layer() {
+  const std::vector<TilePosAndName> newly_added_completed_tiles =
+      world.get_newly_added_completed_tiles();
+
+  if (newly_added_completed_tiles.size() == 0) return;
+
+  std::vector<sf::Vertex> vertices_to_add;
+  for (const TilePosAndName& tile : newly_added_completed_tiles) {
+    if (tile_seen.find(tile.pos) != tile_seen.end()) {
+      warning_log(
+          "Tile at position (%d,%d) has already be drawn in the past.\n",
+          tile.pos.x, tile.pos.y);
+    }
+    tile_seen[tile.pos] = true;
+
+    std::array<sf::Vertex, 4> tile_char_vertices = get_tile_char_vertices(tile);
+    for (const sf::Vertex& v : tile_char_vertices) vertices_to_add.push_back(v);
+  }
+
+  update_layer(LAYER_TILES, vertices_to_add);
+}
+
+void WorldView::update_layer(size_t i_layer,
+                             const std::vector<sf::Vertex> vertices_to_add) {
+  if (i_layer >= NB_GRAPHIC_LAYERS) return;
+
+  if (vertex_counts[i_layer] + vertices_to_add.size() >
+      VERTEX_BUFFER_MAX_SIZE) {
     warning_log(
         "The maximum number of drawable vertices, `%d`, has been reached, new "
         "updates are ignored. You can increase the value of "
@@ -140,20 +205,31 @@ void WorldView::update() {
     return;
   }
 
-  vertex_buffer.update(&vertices_to_add[0], vertices_to_add.size(),
-                       vertex_count);
-  vertex_count += vertices_to_add.size();
+  vertex_buffers[i_layer].update(&vertices_to_add[0], vertices_to_add.size(),
+                                 vertex_counts[i_layer]);
+  vertex_counts[i_layer] += vertices_to_add.size();
+}
+
+void WorldView::update() {
+  update_edges_layer();
+  update_tiles_layer();
 }
 
 void WorldView::draw(sf::RenderTarget& target, sf::RenderStates states) const {
   // apply the transform
   states.transform *= getTransform();
 
-  // apply the tileset texture
-  states.texture = &font.getTexture(GRAPHIC_EDGE_TEXT_SIZE);
   // draw the vertex array
   // target.draw(vertices, states);
-  target.draw(vertex_buffer, states);
+  for (size_t i_layer = 0; i_layer < NB_GRAPHIC_LAYERS; i_layer += 1) {
+    // apply the layer's texture
+    if (i_layer == LAYER_EDGES) {
+      states.texture = &font.getTexture(GRAPHIC_EDGE_TEXT_SIZE);
+    } else if (i_layer == LAYER_TILES) {
+      states.texture = &font.getTexture(GRAPHIC_TILE_TEXT_SIZE);
+    }
+    target.draw(vertex_buffers[i_layer], states);
+  }
 }
 
 WorldView::~WorldView() {}
