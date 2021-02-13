@@ -1,0 +1,22 @@
+{
+  "tileset": "assets/tilesets/CollatzTileset/CollatzTileset.json",
+  "input": {
+    "edges": [
+      [
+        [
+          [0, 0],
+          [0, 1]
+        ],
+        ["ter", 2]
+      ],
+      [
+        [
+          [0, 0],
+          [1, 0]
+        ],
+        ["bin", 0]
+      ]
+    ],
+    "tiles": [[[-1, 0], "3"]]
+  }
+}

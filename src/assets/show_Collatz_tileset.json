@@ -1,0 +1,13 @@
+{
+  "tileset": "assets/tilesets/CollatzTileset/CollatzTileset.json",
+  "input": {
+    "tiles": [
+      [[0, 0], "0"],
+      [[2, 0], "1"],
+      [[4, 0], "2"],
+      [[0, 2], "3"],
+      [[2, 2], "4"],
+      [[4, 2], "5"]
+    ]
+  }
+}

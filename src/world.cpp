@@ -14,9 +14,9 @@ void World::print_all_edges() {
   }
 }
 
-void World::set_edges(EdgeMap p_edges) {
-  input_edges = p_edges;
-  for (const EdgePosAndColor& edge : p_edges) {
+void World::set_input_edges(EdgeMap p_edges) {
+  input_edges = std::move(p_edges);
+  for (const EdgePosAndColor& edge : input_edges) {
     add_edge_if_not_present(edge);
   }
 }

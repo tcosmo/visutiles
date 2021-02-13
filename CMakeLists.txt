@@ -56,3 +56,5 @@ include(CPack)
 
 # Add assets
 file(COPY src/assets DESTINATION ${CMAKE_BINARY_DIR})
+# Add python_input package
+file(COPY python_input DESTINATION ${CMAKE_BINARY_DIR})

@@ -8,33 +8,27 @@
 #include "arguments.h"
 #include "world.h"
 
+#include "third_party/json11/json11.hpp"
+
+#include "tileset.h"
+
 class InputFactory {
  public:
-  InputFactory(InputType input_type, const std::string& input_str)
-      : input_type(input_type), input_str(input_str) {}
+  InputFactory(std::string input_json) : input_json(input_json) {
+    build_initial_configuration();
+  }
 
-  virtual ~InputFactory() {}
-
-  virtual EdgeMap get_initial_configuration();
-
- protected:
-  InputType input_type;
-  std::string input_str;
-};
-
-class CollatzInputFactory : public InputFactory {
- public:
-  CollatzInputFactory(InputType input_type, const std::string& input_str,
-                      Tileset& CollatzTileset)
-      : InputFactory(input_type, input_str), CollatzTileset(CollatzTileset) {}
-
-  ~CollatzInputFactory() {}
+  ~InputFactory() {}
 
   EdgeMap get_initial_configuration();
-  EdgeMap build_parity_vector_initial_configuration();
-  EdgeMap build_dummy_initial_configuration();
+
+  Tileset tileset;
+
+ protected:
+  std::string input_json;
 
  private:
-  Tileset& CollatzTileset;  // not const because tileset query cannot be made
-                            // const because of memoization
+  void build_initial_configuration();
+  EdgeMap initial_configuration;
+  json11::Json json_doc;
 };

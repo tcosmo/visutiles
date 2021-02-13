@@ -83,6 +83,7 @@ std::array<sf::Vertex, 4> WorldView::get_edge_char_vertices(
   sf::Vector2f normal_vect = -1 * get_normal_unit_vector(vect);
 
   // define text
+
   char edge_char = tileset.get_edge_char(edge.color);
   sf::Glyph glyph = font.getGlyph(edge_char, GRAPHIC_EDGE_TEXT_SIZE, false);
 

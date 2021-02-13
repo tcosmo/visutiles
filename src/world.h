@@ -35,7 +35,7 @@ class World {
   World(Tileset& tileset);
   ~World();
 
-  void set_edges(EdgeMap p_edges);
+  void set_input_edges(EdgeMap p_edges);
   const EdgeMap& get_edges() { return edges; }
 
   void update();
@@ -55,7 +55,7 @@ class World {
     uncompleted_tiles_pos.clear();
     dead_tiles_pos.clear();
     clear_view_buffers();
-    set_edges(input_edges);
+    set_input_edges(input_edges);
   }
 
   /* To be used by view */

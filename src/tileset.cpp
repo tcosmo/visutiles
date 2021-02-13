@@ -3,8 +3,11 @@
 #include <fstream>
 #include <string>
 
-Tileset::Tileset(std::string json_file_dir, std::string json_filename)
-    : json_file_dir(json_file_dir), json_filename(json_filename) {
+Tileset::Tileset(std::string json_file_dir, std::string json_filename) {
+  json_file_path = json_file_dir + OS_FILE_SEPARATOR + json_filename;
+}
+
+Tileset::Tileset(std::string json_file_path) : json_file_path(json_file_path) {
   parse_json_file();
 }
 
@@ -59,7 +62,7 @@ char string_to_char(const std::string& s) {
 void Tileset::parse_json_file() {
   // TODO: add error handling for missing mandatory keys: "alphabets",
   // "alphabet_on_edge", "tiles"
-  std::ifstream ifs(json_file_dir + OS_FILE_SEPARATOR + json_filename);
+  std::ifstream ifs(json_file_path);
   std::string content((std::istreambuf_iterator<char>(ifs)),
                       (std::istreambuf_iterator<char>()));
 
@@ -104,7 +107,7 @@ void Tileset::parse_json_file() {
     fatal_error_log(
         "Tiles have four edges. Not the case in `alphabet_on_edge` in %s. "
         "Abort.\n",
-        json_filename.c_str());
+        json_file_path.c_str());
   }
 
   size_t i_edge = 0;
@@ -122,7 +125,7 @@ void Tileset::parse_json_file() {
       fatal_error_log(
           "Tiles have four edges. Not the case in `tiles[%s]` in %s. "
           "Abort.\n",
-          key_value.first.c_str(), json_filename.c_str());
+          key_value.first.c_str(), json_file_path.c_str());
     }
 
     size_t i_edge = 0;

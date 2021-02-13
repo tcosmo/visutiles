@@ -1,69 +1,48 @@
 #include "input_factory.h"
 #include "Collatz.h"
 
-EdgeMap InputFactory::get_initial_configuration() {
-  EdgeMap to_return;
-  return to_return;
-}
+void InputFactory::build_initial_configuration() {
+  std::string err;
+  json_doc = json_doc.parse(input_json, err);
 
-EdgeMap CollatzInputFactory::build_dummy_initial_configuration() {
-  EdgeMap to_return;
+  json11::Json::object json_dict = json_doc.object_items();
+  std::string tileset_path = json_dict["tileset"].string_value();
 
-  std::vector<EdgePosAndColor> edges_to_add;
+  tileset = Tileset(tileset_path);
 
-  edges_to_add.push_back(EdgePosAndColor(
-      OrderedPosCouple({0, 0}, {1, 0}), std::make_pair(std::string("bin"), 0)));
+  json11::Json::object input_dict = json_dict["input"].object_items();
+  json11::Json::array edges = input_dict["edges"].array_items();
 
-  edges_to_add.push_back(EdgePosAndColor(
-      OrderedPosCouple({1, 0}, {1, 1}), std::make_pair(std::string("ter"), 1)));
+  for (const json11::Json& edge_desc : edges) {
+    json11::Json::array edge_pos_and_color = edge_desc.array_items();
+    json11::Json::array edge_pos = edge_pos_and_color[0].array_items();
 
-  edges_to_add.push_back(EdgePosAndColor(
-      OrderedPosCouple({1, 1}, {0, 1}), std::make_pair(std::string("bin"), 1)));
-
-  for (const EdgePosAndColor& edge : edges_to_add) {
-    to_return[edge.pos] = edge.color;
-  }
-
-  return to_return;
-}
-
-EdgeMap CollatzInputFactory::build_parity_vector_initial_configuration() {
-  EdgeMap to_return;
-
-  ParityVector parvec(input_str);
-
-  sf::Vector2i last{0, 0};
-  sf::Vector2i curr{0, 0};
-  for (bool p : parvec.parvec) {
-    if (p == EVEN) {
-      curr += WORLD_WEST;
-      to_return[OrderedPosCouple(curr, last)] = {std::string("bin"), 0};
-      last = curr;
-      continue;
+    std::array<sf::Vector2i, 2> vec_edge_pos;
+    size_t i = 0;
+    for (json11::Json pos : edge_pos) {
+      json11::Json coords = pos.array_items();
+      vec_edge_pos[i] = {coords[0].int_value(), coords[1].int_value()};
+      i += 1;
     }
 
-    curr += WORLD_SOUTH;
-    to_return[OrderedPosCouple(curr, last)] = {std::string("ter"), 1};
-    last = curr;
-    curr += WORLD_WEST;
-    to_return[OrderedPosCouple(curr, last)] = {std::string("bin"), 0};
-    last = curr;
-  }
+    json11::Json::array edge_color = edge_pos_and_color[1].array_items();
+    std::string alphabet_name = edge_color[0].string_value();
+    size_t symbol_index = edge_color[1].int_value();
 
-  return to_return;
+    OrderedPosCouple pos_couple(vec_edge_pos);
+
+    EdgeColor the_edge_color = std::make_pair(alphabet_name, symbol_index);
+
+    initial_configuration[pos_couple] = the_edge_color;
+    if (!tileset.is_valid_edge_color(the_edge_color)) {
+      fatal_error_log(
+          "Edge color `(%s,%d)` is not valid for tileset `%s`. Abort.",
+          the_edge_color.first.c_str(), the_edge_color.second,
+          tileset_path.c_str());
+    }
+  }
 }
 
-EdgeMap CollatzInputFactory::get_initial_configuration() {
-  EdgeMap to_return;
-
-  switch (input_type) {
-    case COLLATZ_PARITY_VECTOR:
-      to_return = std::move(build_parity_vector_initial_configuration());
-      break;
-    default:
-      to_return = std::move(build_dummy_initial_configuration());
-      break;
-  }
-
-  return to_return;
+EdgeMap InputFactory::get_initial_configuration() {
+  return initial_configuration;
 }

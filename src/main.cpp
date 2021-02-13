@@ -9,28 +9,28 @@
 #include "arguments.h"
 #include "input_factory.h"
 
-void input_world(const Arguments& arguments, Tileset& tileset, World& w) {
-  std::unique_ptr<InputFactory> input_factory;
-
-  input_factory = std::unique_ptr<InputFactory>(new CollatzInputFactory(
-      arguments.inputType, arguments.inputStr, tileset));
-
-  w.set_edges(std::move(input_factory->get_initial_configuration()));
-}
+#include <iostream>
 
 int main(int argc, char** argv) {
   // Command line arguments
   Arguments arguments;
   parseArguments(argc, argv, arguments);
 
-  // Tileset
-  Tileset Collatz_tileset("assets/tilesets/CollatzTileset",
-                          "CollatzTileset.json");
+  // Read input json on std::cin
+  std::string input_json = "";
+  if (arguments.inputType == STDIN) {
+    std::string line;
+    while (std::getline(std::cin, line)) {
+      input_json += line;
+    }
+  }
 
-  World w(Collatz_tileset);
+  InputFactory input_factory(input_json);
+  Tileset tileset = input_factory.tileset;
 
-  // Build initial configuration from parsed command line args
-  input_world(arguments, Collatz_tileset, w);
+  World w(tileset);
+  EdgeMap edges = input_factory.get_initial_configuration();
+  w.set_input_edges(edges);
 
   sf::Font default_font;
 
@@ -39,11 +39,11 @@ int main(int argc, char** argv) {
   }
 
   // World view
-  WorldView w_view(Collatz_tileset, w, default_font);
+  WorldView w_view(tileset, w, default_font);
   w_view.update();
 
   // Simulation engine
-  GraphicEngine engine(w, w_view, Collatz_tileset, 1350, 900);
+  GraphicEngine engine(w, w_view, tileset, 1350, 900);
   engine.run();
 
   return 0;

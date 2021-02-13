@@ -5,7 +5,7 @@
 #include <vector>
 #include "config.h"
 
-enum InputType { NONE = 0, COLLATZ_PARITY_VECTOR };
+enum InputType { NONE = 0, STDIN };
 
 // https://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
 class InputParser {
@@ -51,8 +51,7 @@ static InputOption options[OPTION_COUNT] = {
     {"version", 'V', NULL, "Print program version"},
 
     // Custom options
-    {"Collatz-parvec", 'p', "INPUT PARITY VECTOR",
-     "Inputs a Collatz parity vector to the process"},
+    {"stdin input", 'i', NULL, "Reads input (see `input_spec.md`) on stdin"},
 };
 
 static const char doc[] =

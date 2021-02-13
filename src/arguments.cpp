@@ -91,11 +91,10 @@ void parseArguments(int argc, char *argv[], Arguments &arguments) {
 
   // Collatz parity vector
   if (option_exists(input, options[3])) {
-    arguments.inputType = COLLATZ_PARITY_VECTOR;
-    arguments.inputStr = get_cmd_option(input, options[3]);
+    arguments.inputType = STDIN;
     return;
   }
 
-  /*helpPage();
-  exit(0);*/
+  helpPage();
+  exit(0);
 }

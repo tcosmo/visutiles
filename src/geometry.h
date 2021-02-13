@@ -28,6 +28,13 @@ struct OrderedPosCouple {
     }
   }
 
+  OrderedPosCouple(const std::array<sf::Vector2i, 2> &pos)
+      : OrderedPosCouple(pos[0], pos[1]) {}
+
+  void print() const {
+    printf("(%d %d) -- (%d %d)\n", first.x, first.y, second.x, second.y);
+  }
+
   sf::Vector2i get_vector() const {
     return {second.x - first.x, second.y - first.y};
   }

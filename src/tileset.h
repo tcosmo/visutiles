@@ -37,7 +37,9 @@ typedef std::pair<std::array<ColorSet, SQUARE_GRID_NEIGHBORING_SIZE>,
 
 class Tileset {
  public:
+  Tileset() {}
   Tileset(std::string json_file_dir, std::string json_filename);
+  Tileset(std::string json_file_path);
   ~Tileset();
 
   // Return the set of possible edge colors and corresponding tile names
@@ -45,16 +47,22 @@ class Tileset {
   PossibleEdgesColorsAndTilesNames Wang_query(
       std::array<EdgeColor, 4> edge_constraints);
 
-  void print_edge_color(const EdgeColor& c) {
-    printf("%s, `%c`\n", c.first.c_str(), alphabet[c.first][c.second]);
+  void print_edge_color(const EdgeColor& c) const {
+    printf("%s, `%c`\n", c.first.c_str(), alphabet.at(c.first).at(c.second));
   }
 
   const std::vector<EdgeAlphabetName>& get_alphabet_names() const {
     return alphabet_names;
   }
 
+  bool is_valid_edge_color(EdgeColor c) const {
+    return alphabet.find(c.first) != alphabet.end() && c.second >= 0 &&
+           c.second < alphabet.at(c.first).size();
+  }
+
   char get_edge_char(EdgeColor c) const {
-    assert(!(c.second < 0 || c.second >= alphabet.at(c.first).size()));
+    assert(is_valid_edge_color(c));
+
     return alphabet.at(c.first).at(c.second);
   }
 
@@ -66,8 +74,7 @@ class Tileset {
   std::vector<EdgeColor> all_edge_colors;
 
  private:
-  std::string json_file_dir;
-  std::string json_filename;
+  std::string json_file_path;
 
   std::map<std::array<EdgeColor, 4>, PossibleEdgesColorsAndTilesNames>
       memoize_queries;
