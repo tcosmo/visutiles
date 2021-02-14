@@ -159,66 +159,96 @@ def mod3_parity(binary_string):
     return json_dict
 
 
-def not_gate(one_bit):
+def get_not_gate_edges(one_bit, input_south=True, starting=CENTER):
     x = one_bit
-    json_dict = init_json_dict()
     edges = []
+    if input_south:
+        edges.append(get_edge(starting + (0, 0),
+                              starting + (-1, 0), ("bin", int(x))))
+    else:
+        edges.append(get_edge(starting+(0, 1),
+                              starting+(-1, 1), ("bin", int(x))))
+    edges.append(get_edge(starting+(0, 0), starting+(0, 1), ("ter", 1)))
+    return edges
 
-    # Not x
-    edges.append(get_edge((0, 0), (-1, 0), ("bin", int(x))))
-    edges.append(get_edge((0, 0), (0, 1), ("ter", 1)))
+
+def not_gate(one_bit):
+    json_dict = init_json_dict()
+    edges = get_not_gate_edges(one_bit)
 
     json_dict["input"]["edges"] = edges
     return json_dict
 
 
-def and_gate(two_bits):
+def get_and_gate_edges(two_bits, starting=CENTER, mask=(False, False)):
     x, y = two_bits
-    json_dict = init_json_dict()
     edges = []
 
     # And
-    edges.append(get_edge((0, 0), (0, 1), ("ter", int(x))))
-    edges.append(get_edge((0, 1), (-1, 1), ("bin", int(y))))
-    edges.append(get_edge((-1, 1), (-2, 1), ("bin", 0)))
+    if not mask[0]:
+        edges.append(get_edge(starting+(0, 1),
+                              starting+(-1, 1), ("bin", int(x))))
+    if not mask[1]:
+        edges.append(get_edge(starting+(0, 0),
+                              starting+(0, 1), ("ter", int(y))))
 
-    json_dict["input"]["edges"] = edges
+    edges.append(get_edge(starting+(-1, 1), starting+(-2, 1), ("bin", 0)))
+
+    return edges
+
+
+def and_gate(two_bits):
+    json_dict = init_json_dict()
+
+    json_dict["input"]["edges"] = get_and_gate_edges(two_bits)
     return json_dict
+
+
+def get_xor_gate_edges(two_bits, starting=CENTER, input_south=False):
+    edges = []
+    x, y = two_bits
+    edges.append(get_edge(starting, starting + NORTH, ("ter", int(y))))
+    if not input_south:
+        edges.append(get_edge(starting+NORTH, starting +
+                              NORTH + WEST, ("bin", int(x))))
+    else:
+        edges.append(get_edge(starting, starting +
+                              WEST, ("bin", int(x))))
+    return edges
 
 
 def xor_gate(two_bits):
-    x, y = two_bits
     json_dict = init_json_dict()
-    edges = []
-
-    # Xor
-    edges.append(get_edge((0, 0), (0, 1), ("ter", int(y))))
-    edges.append(get_edge((0, 1), (-1, 1), ("bin", int(x))))
-
+    edges = get_xor_gate_edges(two_bits)
     json_dict["input"]["edges"] = edges
     return json_dict
 
 
-def or_gate(two_bits):
+def get_or_gate_edges(two_bits, starting=CENTER):
     x, y = two_bits
+
+    edges = []
+    edges = get_xor_gate_edges(two_bits, starting)
+
+    edges.append(get_edge(starting, starting + (0, -1), ("ter", 1)))
+    edges.append(get_edge(starting + (-1, 0), starting + (-2, 0), ("bin", 0)))
+    edges.append(get_edge(starting + (-3, 1),
+                          starting + (-3, 2), ("ter", int(y))))
+    edges.append(get_edge(starting + (-3, 1), starting + (-2, 1), ("bin", 1)))
+
+    edges.append(get_edge(starting + (-3, 2), starting + (-4, 2), ("bin", 0)))
+    edges.append(get_edge(starting + (-4, 2), starting + (-5, 2), ("bin", 0)))
+    edges.append(get_edge(starting + (-5, 2), starting + (-6, 2), ("bin", 0)))
+    edges.append(get_edge(starting + (-6, 2), starting + (-7, 2), ("bin", 0)))
+
+    return edges
+
+
+def or_gate(two_bits):
+
     json_dict = init_json_dict()
     edges = []
-
-    # or
-    edges.append(get_edge((0, 0), (0, 1), ("ter", int(y))))
-    edges.append(get_edge((0, 1), (-1, 1), ("bin", int(x))))
-
-    edges.append(get_edge((0, 0), (0, -1), ("ter", 1)))
-    edges.append(get_edge((-1, 0), (-2, 0), ("bin", 0)))
-    edges.append(get_edge((-3, 1), (-3, 2), ("ter", int(y))))
-    edges.append(get_edge((-3, 1), (-2, 1), ("bin", 1)))
-
-    edges.append(get_edge((-3, 2), (-4, 2), ("bin", 0)))
-    edges.append(get_edge((-4, 2), (-5, 2), ("bin", 0)))
-    edges.append(get_edge((-5, 2), (-6, 2), ("bin", 0)))
-    edges.append(get_edge((-6, 2), (-7, 2), ("bin", 0)))
-    # edges.append(get_edge((-2, 2), (-1, 2), ("bin", int(x))))
-    # edges.append(get_edge((0, 0), (0, -1), ("ter", 1))
+    edges = get_or_gate_edges(two_bits)
 
     json_dict["input"]["edges"] = edges
     return json_dict
@@ -230,29 +260,45 @@ def rule_110(three_bits):
     json_dict = init_json_dict()
     edges = []
 
-    # Not x
-    edges.append(get_edge((0, 0), (-1, 0), ("bin", int(x))))
-    edges.append(get_edge((0, 0), (0, 1), ("ter", 1)))
+    edges += get_not_gate_edges(x, input_south=False)
+    edges += get_and_gate_edges((x, y), CENTER + SOUTH, mask=(True, False))
+
+    edges += [get_edge((-2, 0), (-3, 0), ("bin", 0))]
+
+    edges += [get_edge((-2, -2), (-2, -1), ("ter", 1))]
+
+    edges += [get_edge((-3, -1), (-4, -1), ("bin", 0))]
+
+    edges += [get_edge((-4, 1), (-4, 2), ("ter", int(x)))]
+
+    second_module_start = np.array((-4, 2))
+    edges += get_xor_gate_edges((y, z), input_south=False,
+                                starting=second_module_start)
+
+    edges += [get_edge((-4, -2), (-4, -3), ("ter", 0))]
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("1111")[::-1], WEST, starting=np.array((-5, -1)))
 
     # And y
-    edges.append(get_edge((-1, 1), (-2, 1), ("bin", 0)))
-    edges.append(get_edge((-2, 1), (-3, 1), ("bin", int(y))))
-    edges.append(get_edge((-3, 1), (-4, 1), ("bin", 0)))
+    # edges.append(get_edge((-1, 1), (-2, 1), ("bin", 0)))
+    # edges.append(get_edge((-2, 1), (-3, 1), ("bin", int(y))))
+    # edges.append(get_edge((-3, 1), (-4, 1), ("bin", 0)))
 
-    # XOR(y,z)
-    edges.append(get_edge((-4, 1), (-4, 2), ("ter", int(z))))
-    edges.append(get_edge((-4, 2), (-5, 2), ("bin", int(y))))
+    # # XOR(y,z)
+    # edges.append(get_edge((-4, 1), (-4, 2), ("ter", int(z))))
+    # edges.append(get_edge((-4, 2), (-5, 2), ("bin", int(y))))
 
-    # OR
-    edges.append(get_edge((-4, -1), (-4, 0), ("ter", 1)))
-    edges.append(get_edge((-5, 0), (-6, 0), ("bin", 0)))
-    edges.append(get_edge((-6, 2), (-7, 2), ("bin", int(y))))
-    # edges.append(get_edge((-7, 2), (-6, 2), ("bin", 1)))
+    # # OR
+    # edges.append(get_edge((-4, -1), (-4, 0), ("ter", 1)))
+    # edges.append(get_edge((-5, 0), (-6, 0), ("bin", 0)))
+    # edges.append(get_edge((-6, 2), (-7, 2), ("bin", int(y))))
+    # # edges.append(get_edge((-7, 2), (-6, 2), ("bin", 1)))
 
-    edges.append(get_edge((-7, 3), (-8, 3), ("bin", 0)))
-    edges.append(get_edge((-8, 3), (-9, 3), ("bin", 0)))
-    edges.append(get_edge((-9, 3), (-10, 3), ("bin", 0)))
-    edges.append(get_edge((-10, 3), (-11, 3), ("bin", 0)))
+    # edges.append(get_edge((-7, 3), (-8, 3), ("bin", 0)))
+    # edges.append(get_edge((-8, 3), (-9, 3), ("bin", 0)))
+    # edges.append(get_edge((-9, 3), (-10, 3), ("bin", 0)))
+    # edges.append(get_edge((-10, 3), (-11, 3), ("bin", 0)))
 
     json_dict["input"]["edges"] = edges
     return json_dict
