@@ -36,9 +36,11 @@ void InputFactory::build_initial_configuration() {
     initial_configuration[pos_couple] = the_edge_color;
     if (!tileset.is_valid_edge_color(the_edge_color)) {
       fatal_error_log(
-          "Edge color `(%s,%d)` is not valid for tileset `%s`. Abort.",
+          "Edge color `(%s,%d)` for edge `(%d,%d),(%d,%d)`, is not valid for"
+          " tileset `%s`. Abort.",
           the_edge_color.first.c_str(), the_edge_color.second,
-          tileset_path.c_str());
+          vec_edge_pos[0].x, vec_edge_pos[0].y, vec_edge_pos[1].x,
+          vec_edge_pos[1].y, tileset_path.c_str());
     }
   }
 }
