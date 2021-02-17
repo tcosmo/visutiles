@@ -1,8 +1,79 @@
 import sys
 import json
 from python_input.geometry import np, WEST, SOUTH, EAST, NORTH, CENTER
-from python_input.Collatz_inputter import get_edge, init_json_dict, \
+from python_input.Collatz_inputter import get_edge, get_edge_v, init_json_dict, \
     get_edges_write_word_then_move, string_to_colors
+
+
+def south_west_one_pusher(one_bit):
+    json_dict = init_json_dict()
+    edges = []
+    length = int(1)
+
+    edges.append(get_edge_v(CENTER, WEST, ("bin", int(one_bit))))
+
+    # north coming signal
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (2 * length), binary=False), SOUTH, starting=CENTER)
+
+    # east going exchanger
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (2 * length+1), binary=True), EAST, starting=CENTER+(2 * length+1)*SOUTH+WEST)
+
+    # 0-signal pusher
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (2 * length + 2), binary=True), EAST, starting=CENTER + (2 * length + 1) * SOUTH + WEST + (2 * length + 2) * WEST)
+    edges.append(get_edge_v(CENTER + (2 * length + 1) * SOUTH +
+                            WEST + (2 * length + 2) * WEST, NORTH, ("ter", int(0))))
+
+    # outputting horizontally
+    edges.append(get_edge_v(CENTER+(2 * length+1) *
+                            SOUTH + WEST + (2 * length + 1) * EAST + EAST, NORTH, ("ter", int(0))))
+
+    now = CENTER + (2 * length + 1) * SOUTH + WEST + \
+        (2 * length + 1) * EAST + EAST
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (2 * length), binary=False), SOUTH, starting=now)
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (2 * length+1), binary=True), EAST, starting=now+CENTER+(2 * length+1)*SOUTH+WEST)
+
+    pusher_extent = 2 * length + 8
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (pusher_extent), binary=True), EAST, starting=now+CENTER + (2 * length + 1) * SOUTH + WEST + (pusher_extent) * WEST)
+    edges.append(get_edge_v(now+CENTER + (2 * length + 1) * SOUTH +
+                            WEST + (pusher_extent) * WEST, NORTH, ("ter", int(0))))
+
+    edges.append(get_edge_v(now+CENTER+(2 * length+1) *
+                            SOUTH + WEST + (2 * length + 1) * EAST + EAST, NORTH, ("ter", int(0))))
+
+    json_dict["input"]["edges"] = edges
+    return json_dict
+
+
+def south_west_pusher(one_bit, length):
+    json_dict = init_json_dict()
+    edges = []
+    length = int(length)
+
+    edges.append(get_edge_v(CENTER, WEST, ("bin", int(one_bit))))
+
+    # north coming signal
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (2 * length), binary=False), SOUTH, starting=CENTER)
+
+    # east going exchanger
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (2 * length+1), binary=True), EAST, starting=CENTER+(2 * length+1)*SOUTH+WEST)
+
+    # 0-signal pusher
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (2 * length + 2), binary=True), EAST, starting=CENTER + (2 * length + 1) * SOUTH + WEST + (2 * length + 2) * WEST)
+    edges.append(get_edge_v(CENTER + (2 * length + 1) * SOUTH +
+                            WEST + (2 * length + 2) * WEST, NORTH, ("ter", int(0))))
+
+    json_dict["input"]["edges"] = edges
+    return json_dict
 
 
 def get_horizontal_wire_edges(one_bit, length, input_west=True, starting=CENTER, mask=[False]):
