@@ -1,6 +1,6 @@
 #include "world.h"
 
-World::World(Tileset& tileset) : tileset(tileset) {}
+World::World(Tileset& tileset) : tileset(tileset), missmatching_edge_count(0) {}
 
 void World::print_edge(const EdgePosAndColor& edge) {
   printf("\t(%d,%d) (%d,%d) (%s,%d)\n", edge.pos.first.x, edge.pos.first.y,
@@ -98,13 +98,42 @@ void World::update() {
     }
   }
 
+  // for edge mismatch tracking
+  std::map<OrderedPosCouple, bool, CompareOrderedPosCouple> edge_pos_seen;
+
   for (const EdgePosAndColor& edge : edges_to_add) {
-    add_edge_if_not_present(edge);
+    if (edge_pos_seen.find(edge.pos) == edge_pos_seen.end()) {
+      add_edge_if_not_present(edge);
+    } else {
+      // Check for mismatch
+      if (edge.color != edges[edge.pos]) {
+        set_mismatching_edge(edge.pos);
+      }
+    }
+
+    edge_pos_seen[edge.pos] = true;
   }
 
   for (const sf::Vector2i& tile_pos : to_remove_from_uncompleted_tiles_pos) {
     uncompleted_tiles_pos.erase(tile_pos);
   }
+}
+
+// Set an edge to mismatch when a clash is detected
+void World::set_mismatching_edge(const OrderedPosCouple& edge_pos) {
+  assert(edges.find(edge_pos) != edges.end());
+
+  auto added_edge_iterator =
+      std::find(newly_added_edges.begin(), newly_added_edges.end(),
+                EdgePosAndColor(edge_pos, edges[edge_pos]));
+
+  assert(added_edge_iterator != newly_added_edges.end());
+  newly_added_edges.erase(added_edge_iterator);
+
+  missmatching_edge_count += 1;
+
+  edges[edge_pos] = MISMATCH_EDGE_COLOR;
+  newly_added_edges.push_back(EdgePosAndColor(edge_pos, MISMATCH_EDGE_COLOR));
 }
 
 World::~World() {}

@@ -19,6 +19,9 @@ typedef char TileName;
 // An edge color is given by an alphabet name and a character in that alphabet
 typedef std::pair<std::string, int> EdgeColor;
 static const std::pair<std::string, int> ANY_EDGE_COLOR = {"", -1};
+static const char* MISMATCH_COLOR_NAME = "mismatch";
+static const std::pair<std::string, int> MISMATCH_EDGE_COLOR = {
+    MISMATCH_COLOR_NAME, -2};
 
 struct CompareEdgeColors {
   bool operator()(const EdgeColor& a, const EdgeColor& b) const {

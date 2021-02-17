@@ -20,6 +20,26 @@ def get_edge(pos_a, pos_b, color):
             list(color)]
 
 
+def get_edge_v(pos_a, vec, color):
+    return [[pos_to_serlist(pos_a), pos_to_serlist(pos_a+vec)],
+            list(color)]
+
+
+def test_edge_mismatch_and_dead_tile():
+    json_dict = init_json_dict()
+
+    edges = []
+
+    edges.append(get_edge_v(CENTER, NORTH, ("ter", 2)))
+    edges.append(get_edge_v(CENTER, WEST, ("bin", 0)))
+    edges.append(get_edge_v(CENTER+WEST, WEST, ("bin", 0)))
+    edges.append(get_edge_v(CENTER+WEST+WEST, NORTH, ("ter", 0)))
+    edges.append(get_edge_v(CENTER+EAST, NORTH, ("ter", 0)))
+    json_dict["input"]["edges"] = edges
+
+    return json_dict
+
+
 def get_pv_edges(pv_string, starting=CENTER, full_of_zeros=False):
     last_pos = None
     curr_pos = np.array(starting)

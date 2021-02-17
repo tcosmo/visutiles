@@ -13,7 +13,9 @@ GraphicEngine::~GraphicEngine() {}
 void GraphicEngine::print_simulation_report() {
   printf("=== Simulation Report ===\n");
   printf("   == Edges ==\n");
-  printf("      - Total number of edges: %zu\n", world.edge_count());
+  printf("      - Edges count: %zu\n", world.edge_count());
+  printf("      - Missmatching edges count: %zu\n",
+         world.get_mismatching_edge_count());
   printf("\n   == Tiles ==\n");
   printf("      - Uncompleted tiles: %zu\n", world.uncompleted_tile_count());
   printf("      - Completed tiles: %zu\n", world.completed_tile_count());

@@ -24,7 +24,7 @@ def horizontal_wire(one_bit, length, input_west="True"):
     return json_dict
 
 
-def simple_bridge(two_bits, length):
+def simple_ne_bridge(two_bits, length):
     json_dict = init_json_dict()
     length = int(length)
     edges = []
@@ -54,6 +54,75 @@ def simple_bridge(two_bits, length):
                        EAST * 2 * length+1*EAST+2*length*SOUTH+EAST, ("bin", int(two_bits[1])))]
     # edges += [get_edge(EAST * 2 * length+1*EAST+2*length*SOUTH+WEST,
     #                    EAST * 2 * length+1*EAST+2*length*SOUTH+EAST+WEST, ("bin", int(two_bits[1])))]
+
+    json_dict["input"]["edges"] = edges
+    return json_dict
+
+
+def simple_sw_bridge(two_bits, length):
+    two_bits = two_bits[::-1]
+    json_dict = init_json_dict()
+    length = int(length)
+    edges = []
+    k = 2
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (6 * length + k)), EAST, CENTER + (5 - k + 2) * WEST)
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (6 * length)), EAST, CENTER + (5 - k + 2) * WEST + 2*EAST+(6 * length + k-1)*EAST)
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (2)), WEST, CENTER + 2 * NORTH + 5 * WEST)
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (6)), WEST, CENTER + 0*NORTH+7*WEST)
+
+    # edges += get_edges_write_word_then_move(
+    # string_to_colors(two_bits[1] * 2), EAST, starting=EAST * 2 * length)
+
+    # edges += get_edges_write_word_then_move(
+    #    string_to_colors("0" * (2 * length)), WEST, EAST * 4 * length + 2 * EAST)
+    l = 7
+
+    edges += [get_edge(CENTER + (5 - k + 2) * WEST + EAST+(6 * length + k-1)*EAST+NORTH+l*EAST+EAST+NORTH,
+                       CENTER + (5 - k + 2) * WEST + EAST + (6 * length + k - 1) * EAST + 2 * NORTH + l * EAST+EAST+NORTH, ("ter", int(two_bits[0])))]
+
+    edges += [get_edge(CENTER + (5 - k + 2) * WEST + EAST+(6 * length + k-1)*EAST+NORTH+l*EAST+EAST+2*NORTH+WEST,
+                       CENTER + (5 - k + 2) * WEST + EAST + (6 * length + k - 1) * EAST + 2 * NORTH + l * EAST+EAST+NORTH, ("bin", int(0)))]
+
+    edges += [get_edge(CENTER + (5 - k + 2) * WEST + EAST+(6 * length + k-1)*EAST+l*EAST+EAST,
+                       CENTER + (5 - k + 2) * WEST + EAST+(6 * length + k-1)*EAST + NORTH+l*EAST+EAST, ("ter", int(0)))]
+
+    edges += [get_edge(CENTER + (5 - k + 2) * WEST + EAST+(6 * length + k-1)*EAST+NORTH+l*EAST+EAST,
+                       CENTER + (5 - k + 2) * WEST + EAST+(6 * length + k-1)*EAST + 2*NORTH+l*EAST+EAST, ("ter", int(0)))]
+
+    # edges += get_edges_write_word_then_move(
+    #     string_to_colors("0", binary=False), NORTH, starting=EAST * 2 * length + 2*EAST + NORTH)
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (4 * length), binary=False), NORTH, starting=EAST * 2 * length + 2 * EAST + NORTH+NORTH)
+
+    edges += [get_edge(EAST * 2 * length + 2 * EAST + WEST,
+                       EAST * 2 * length + 2 * EAST + 2*WEST, ("bin", int(0)))]
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * 6 * length, binary=False), SOUTH, starting=EAST * 2 * length+2*EAST)
+
+    edges += [get_edge(EAST * 2 * length + 2 * EAST + NORTH+2*length*NORTH+NORTH+2*NORTH,
+                       EAST * 2 * length + 2 * EAST + NORTH + 2 * length * NORTH + WEST + NORTH+2*NORTH, ("bin", int(two_bits[1])))]
+
+    qq = 40
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * (10 * length), binary=False), NORTH, starting=qq*WEST+EAST * 2 * length + 2 * EAST + NORTH+NORTH)
+
+    edges += [get_edge(qq*WEST+EAST * 2 * length + 2 * EAST + NORTH+2*length*NORTH+NORTH+2*NORTH,
+                       qq*WEST+EAST * 2 * length + 2 * EAST + NORTH + 2 * length * NORTH + WEST + NORTH+2*NORTH, ("bin", int(two_bits[1])))]
+
+    # edges += [get_edge(EAST * 2 * length+1*EAST+2*length*SOUTH+WEST,
+    #                    EAST * 2 * length+1*EAST+2*length*SOUTH+EAST+WEST, ("bin", int(two_bits[1])))]
+
+    edges += get_horizontal_wire_edges("1", 10,
+                                       input_west=False, starting=SOUTH*7+EAST*24)
 
     json_dict["input"]["edges"] = edges
     return json_dict

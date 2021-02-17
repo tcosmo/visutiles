@@ -40,6 +40,10 @@ struct OrderedPosCouple {
   }
 
   sf::Vector2i first, second;
+
+  bool operator==(const OrderedPosCouple &rhs) const {
+    return first == rhs.first && second == rhs.second;
+  }
 };
 
 struct CompareOrderedPosCouple {

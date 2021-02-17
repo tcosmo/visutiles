@@ -14,6 +14,8 @@ WorldView::WorldView(const Tileset& tileset, const World& world,
        i_alphabet += 1)
     alphabet_color[tileset.get_alphabet_names()[i_alphabet]] =
         COLOR_WHEEL[i_alphabet % COLOR_WHEEL.size()];
+
+  alphabet_color[MISMATCH_COLOR_NAME] = MISMATCH_COLOR;
 }
 
 void WorldView::reset_vertex_buffer() {
@@ -135,8 +137,12 @@ void WorldView::update_edges_layer() {
     std::array<sf::Vertex, 4> edge_vertices = get_edge_vertices(edge);
     for (const sf::Vertex& v : edge_vertices) vertices_to_add.push_back(v);
 
-    std::array<sf::Vertex, 4> edge_char_vertices = get_edge_char_vertices(edge);
-    for (const sf::Vertex& v : edge_char_vertices) vertices_to_add.push_back(v);
+    if (edge.color != ANY_EDGE_COLOR && edge.color != MISMATCH_EDGE_COLOR) {
+      std::array<sf::Vertex, 4> edge_char_vertices =
+          get_edge_char_vertices(edge);
+      for (const sf::Vertex& v : edge_char_vertices)
+        vertices_to_add.push_back(v);
+    }
   }
 
   update_layer(LAYER_EDGES, vertices_to_add);
@@ -209,18 +215,20 @@ void WorldView::update_tiles_layer() {
 }
 
 std::array<sf::Vertex, 4> WorldView::get_tile_color_vertices(
-    const TilePosAndName& tile) {
-  char tile_char = tile.name;
-  sf::Color tile_color =
-      COLOR_WHEEL_SECONDARY[(tile_char + 4) % COLOR_WHEEL_SECONDARY.size()];
-  tile_color.a = 120;
+    const sf::Vector2i& tile_pos, const sf::Color tile_color) {
   std::array<sf::Vertex, 4> text_quad;
-  text_quad[0].position = world_pos_to_screen_pos(tile.pos);
+  text_quad[0].position =
+      world_pos_to_screen_pos(tile_pos) -
+      sf::Vector2f{GRAPHIC_EDGE_THICK, 1.0 * GRAPHIC_EDGE_THICK};
 
-  text_quad[1].position = world_pos_to_screen_pos(tile.pos + WORLD_NORTH);
+  text_quad[1].position =
+      world_pos_to_screen_pos(tile_pos + WORLD_NORTH) -
+      sf::Vector2f{GRAPHIC_EDGE_THICK, 0 * GRAPHIC_EDGE_THICK};
   text_quad[2].position =
-      world_pos_to_screen_pos(tile.pos + WORLD_NORTH + WORLD_WEST);
-  text_quad[3].position = world_pos_to_screen_pos(tile.pos + WORLD_WEST);
+      world_pos_to_screen_pos(tile_pos + WORLD_NORTH + WORLD_WEST) -
+      sf::Vector2f{0, 0 * GRAPHIC_EDGE_THICK};
+  text_quad[3].position = world_pos_to_screen_pos(tile_pos + WORLD_WEST) -
+                          sf::Vector2f{0, GRAPHIC_EDGE_THICK};
 
   text_quad[0].color = tile_color;
   text_quad[1].color = tile_color;
@@ -229,6 +237,16 @@ std::array<sf::Vertex, 4> WorldView::get_tile_color_vertices(
   text_quad[3].color = tile_color;
 
   return text_quad;
+}
+
+std::array<sf::Vertex, 4> WorldView::get_tile_color_vertices(
+    const TilePosAndName& tile) {
+  char tile_char = tile.name;
+  sf::Color tile_color =
+      COLOR_WHEEL_SECONDARY[(tile_char + 4) % COLOR_WHEEL_SECONDARY.size()];
+  tile_color.a = 120;
+
+  return get_tile_color_vertices(tile.pos, tile_color);
 }
 
 // Update the layer responsible for tiles rendering in color mode
@@ -255,6 +273,37 @@ void WorldView::update_tiles_colors_layer() {
   update_layer(LAYER_TILES, vertices_to_add);
 }
 
+void WorldView::update_additional_tiles_layer() {
+  const std::vector<sf::Vector2i>& newly_added_dead_tiles =
+      world.get_newly_added_dead_tiles_pos();
+
+  const PosSet& newly_added_uncompleted_tiles =
+      world.get_newly_added_uncompleted_tiles_pos();
+
+  if (newly_added_dead_tiles.size() == 0 &&
+      newly_added_uncompleted_tiles.size() == 0)
+    return;
+
+  std::vector<sf::Vertex> vertices_to_add;
+
+  for (const sf::Vector2i& dead_tile_pos : newly_added_dead_tiles) {
+    std::array<sf::Vertex, 4> tile_color_vertices =
+        get_tile_color_vertices(dead_tile_pos, sf::Color(0, 0, 0, 250));
+    for (const sf::Vertex& v : tile_color_vertices)
+      vertices_to_add.push_back(v);
+  }
+
+  for (const sf::Vector2i& uncompleted_tile_pos :
+       newly_added_uncompleted_tiles) {
+    std::array<sf::Vertex, 4> tile_color_vertices = get_tile_color_vertices(
+        uncompleted_tile_pos, sf::Color(0, 100, 255, 140));
+    for (const sf::Vertex& v : tile_color_vertices)
+      vertices_to_add.push_back(v);
+  }
+
+  update_layer(LAYER_ADDITIONAL_TILES, vertices_to_add);
+}
+
 void WorldView::update_layer(size_t i_layer,
                              const std::vector<sf::Vertex> vertices_to_add) {
   if (i_layer >= NB_GRAPHIC_LAYERS) return;
@@ -275,6 +324,8 @@ void WorldView::update_layer(size_t i_layer,
 }
 
 void WorldView::update() {
+  // Dead tiles and uncompleted tiles
+  update_additional_tiles_layer();
   update_tiles_colors_layer();
   update_tiles_layer();
   update_edges_layer();

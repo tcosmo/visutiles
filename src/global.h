@@ -114,3 +114,5 @@ static const std::array COLOR_WHEEL_3 = {
     mac2_13,          mac2_14,        mac2_14, mac2_15, mac2_16};
 
 static const char* DEFAULT_FONT = "assets/fonts/arial.ttf";
+
+static const sf::Color MISMATCH_COLOR = sf::Color(255, 255, 240);

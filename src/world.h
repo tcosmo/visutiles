@@ -21,6 +21,10 @@ struct EdgePosAndColor {
     pos = pos_and_color.first;
     color = pos_and_color.second;
   }
+
+  bool operator==(const EdgePosAndColor& rhs) const {
+    return pos == rhs.pos && color == rhs.color;
+  }
 };
 
 struct TilePosAndName {
@@ -56,7 +60,10 @@ class World {
     dead_tiles_pos.clear();
     clear_view_buffers();
     set_input_edges(input_edges);
+    missmatching_edge_count = 0;
   }
+
+  size_t get_mismatching_edge_count() { return missmatching_edge_count; }
 
   /* To be used by view */
   const std::vector<EdgePosAndColor>& get_newly_added_edges() const {
@@ -90,12 +97,16 @@ class World {
   // This invariant is not always maintained as an update step might be
   // necessary in order to realise that a given tile is in fact dead or complete
   PosSet uncompleted_tiles_pos;
+
   // Dead tiles are tiles with no solution at all to their Wang colors
   PosSet dead_tiles_pos;
+
+  size_t missmatching_edge_count;
 
   std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE>
   get_edges_colors_at_tile_pos(const sf::Vector2i& tile_pos);
   void add_edge_if_not_present(const EdgePosAndColor& edge);
+  void set_mismatching_edge(const OrderedPosCouple& edge_pos);
 
   void spawn_tile_pos(const sf::Vector2i& tile_pos) {
     spawned_tiles_pos.insert(tile_pos);
