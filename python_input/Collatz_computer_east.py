@@ -64,25 +64,18 @@ def get_rule_110_router_module_edges_middle_pole(bit, starting, length_params):
     now += (length_params[1] + 5)*WEST
     edges += get_edges_write_word_then_move(
         string_to_colors("0", binary=False), SOUTH, now)
-    # # Redescendre au sud
-    # edges += get_edges_write_word_then_move(
-    #     string_to_colors("0", binary=True), WEST, now + WEST)
 
-    # edges += get_edges_write_word_then_move(
-    #     string_to_colors("1", binary=False), SOUTH, now + SOUTH + WEST)
-    # edges += get_edges_write_word_then_move(
-    #     string_to_colors("1", binary=False), SOUTH, now + SOUTH)
-    # edges += get_edges_write_word_then_move(
-    #     string_to_colors("1", binary=False), SOUTH, now + SOUTH+EAST)
+    edges += get_edges_write_word_then_move(
+        string_to_colors("11", binary=False), SOUTH, now+SOUTH+WEST)
 
-    # # finir le mur
-    # edges += get_edges_write_word_then_move(
-    #     string_to_colors("2", binary=False), SOUTH, now+SOUTH)
+    edges += get_edges_write_word_then_move(
+        string_to_colors("1", binary=False), SOUTH, now + SOUTH)
+    edges += get_edges_write_word_then_move(
+        string_to_colors("1", binary=False), SOUTH, now + 2 * SOUTH)
 
-    # # Or
-
-    # edges += get_edges_write_word_then_move(
-    #     string_to_colors("1", binary=False), SOUTH, now+2*SOUTH+WEST)
+    # OR
+    edges += get_edges_write_word_then_move(
+        string_to_colors("111"[::-1], binary=True), WEST, now+1*WEST)
 
     return edges
 
