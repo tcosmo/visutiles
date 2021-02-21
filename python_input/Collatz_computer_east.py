@@ -5,11 +5,12 @@ from python_input.Collatz_inputter import get_edge, get_edge_v, init_json_dict, 
     get_edges_write_word_then_move, string_to_colors
 
 
-def get_rule_110_router_module_edges_north_pole(bit, starting, length_params):
+def get_rule_110_router_module_edges_north_pole(bit, starting, length_params, mask_input=False):
     edges = []
     now = starting.copy()
 
-    edges.append(get_edge_v(now, NORTH, ("ter", int(bit))))
+    if not mask_input:
+        edges.append(get_edge_v(now, NORTH, ("ter", int(bit))))
 
     edges += get_edges_write_word_then_move(
         string_to_colors("0" * (length_params[1]+2)), WEST, now)
@@ -28,20 +29,29 @@ def get_rule_110_router_module_edges_north_pole(bit, starting, length_params):
     return edges
 
 
-def get_rule_110_router_module_edges_middle_pole(bit, starting, length_params):
+def two_zero_corner(starting):
     edges = []
     now = starting.copy()
+    edges.append(get_edge_v(now, EAST, ("bin", 0)))
+    edges.append(get_edge_v(now, SOUTH, ("ter", 2)))
+    return edges
 
-    edges.append(get_edge_v(now+WEST, NORTH, ("ter", int(bit))))
-    edges.append(get_edge_v(
-        now+NORTH*length_params[2], NORTH, ("ter", int(bit))))
 
-    now += WEST
+def get_rule_110_router_module_edges_middle_pole(bit, starting, length_params, mask_input=False):
+    edges = []
+    now = starting.copy()
+    if not mask_input:
+        edges.append(get_edge_v(now, NORTH, ("ter", int(bit))))
+        edges.append(get_edge_v(
+            now+NORTH*length_params[2], NORTH, ("ter", int(bit))))
+
     edges += get_edges_write_word_then_move(
-        string_to_colors("0" * (length_params[1])), WEST, now)
+        string_to_colors("1"), WEST, now+NORTH)
+    edges += get_edges_write_word_then_move(
+        string_to_colors("111"), WEST, now+WEST)
 
     # And(Not(x),y)
-    now += (length_params[1]) * WEST
+    now += (length_params[1]+1) * WEST
 
     edges.append(get_edge_v(
         now + WEST, WEST, ("bin", int(1))))
@@ -77,15 +87,95 @@ def get_rule_110_router_module_edges_middle_pole(bit, starting, length_params):
     edges += get_edges_write_word_then_move(
         string_to_colors("111"[::-1], binary=True), WEST, now+1*WEST)
 
+    # repiping output
+    now += 1 * WEST + 4 * SOUTH + 3 * WEST
+    edges += get_edges_write_word_then_move(
+        string_to_colors("1", binary=False), SOUTH, now + EAST)
+
+    # param impair
+    repipe = 9
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0"*repipe, binary=True), WEST, now + SOUTH)
+
+    for i in range(repipe-2):
+        edges += get_edges_write_word_then_move(
+            string_to_colors("1", binary=False), NORTH, now + i * WEST+2*WEST)
+        edges += get_edges_write_word_then_move(
+            string_to_colors("1", binary=False), NORTH, now + i*WEST+3*SOUTH+2*WEST)
+
+    now += repipe * WEST
+    #edges += two_zero_corner(now + NORTH)
+
+    edges.append(get_edge_v(now + WEST, SOUTH, ("ter", 0)))
+    edges.append(get_edge_v(now + WEST, EAST, ("bin", 0)))
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("1" * 6, binary=False), SOUTH, now + SOUTH)
+
+    edges.append(get_edge_v(now + 7*SOUTH+NORTH+EAST, SOUTH, ("ter", 1)))
+    edges.append(get_edge_v(now + 7*SOUTH, SOUTH, ("ter", 0)))
+    edges.append(get_edge_v(now + 8 * SOUTH, SOUTH, ("ter", 0)))
+    now += 9 * SOUTH+WEST
+
+    repipe2 = 6*2
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * repipe2, binary=True), WEST, now)
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("1" * 15+"10", binary=False), NORTH, now+repipe2*WEST+2*EAST+2*NORTH)
+
+    now += repipe2*WEST
+    repipe3 = 6*2
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * repipe3, binary=True), WEST, now)
+
+    # second input
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * repipe3, binary=True), WEST, now+9*NORTH)
+
+    # third input
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0" * repipe3, binary=True), WEST, now+13*NORTH)
+
+    # fourth input
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors("1" * (repipe3 - 3), binary=True), WEST, now + 18 * NORTH)
+    edges += get_edges_write_word_then_move(
+        string_to_colors("0", binary=True), WEST, now + 18 * NORTH + NORTH + (repipe3 - 3) * WEST)
+    edges += get_edges_write_word_then_move(
+        string_to_colors("11", binary=True), WEST, now+18*NORTH+(repipe3 - 2)*WEST)
+
+    for i in range(repipe3-2):
+        edges += get_edges_write_word_then_move(
+            string_to_colors("1", binary=False), NORTH, now + i * WEST+2*WEST+2*NORTH)
+        edges += get_edges_write_word_then_move(
+            string_to_colors("1", binary=False), NORTH, now + i * WEST + 3 * SOUTH + 2 * WEST + NORTH)
+
+        edges += get_edges_write_word_then_move(
+            string_to_colors("1", binary=False), NORTH, now + i * WEST+2*WEST+7*NORTH)
+        edges += get_edges_write_word_then_move(
+            string_to_colors("1", binary=False), NORTH, now + i*WEST+3*SOUTH+2*WEST+13*NORTH)
+
+        edges += get_edges_write_word_then_move(
+            string_to_colors("1", binary=False), NORTH, now + i * WEST+2*WEST+11*NORTH)
+        edges += get_edges_write_word_then_move(
+            string_to_colors("1", binary=False), NORTH, now + i * WEST + 3 * SOUTH + 2 * WEST + 17 * NORTH)
+
+        edges += get_edges_write_word_then_move(
+            string_to_colors("1", binary=False), NORTH, now + i * WEST+2*WEST+16*NORTH)
+
     return edges
 
 
-def get_rule_110_router_module_edges_south_pole(bit, starting, length_params):
+def get_rule_110_router_module_edges_south_pole(bit, starting, length_params, mask_input=False):
     edges = []
     now = starting.copy()
 
-    edges.append(get_edge_v(now, NORTH, ("ter", int(bit))))
-    edges.append(get_edge_v(now+NORTH, NORTH, ("ter", int(bit))))
+    if not mask_input:
+        edges.append(get_edge_v(now, NORTH, ("ter", int(bit))))
+        edges.append(get_edge_v(now+NORTH, NORTH, ("ter", int(bit))))
     edges += get_edges_write_word_then_move(
         string_to_colors("1" * length_params[1]), WEST, now)
 
@@ -120,20 +210,20 @@ def get_rule_110_router_module_edges_south_pole(bit, starting, length_params):
     return edges
 
 
-def get_rule_110_router_module_edges(bit, starting, length_params):
+def get_rule_110_router_module_edges(bit, starting, length_params,  mask_input=False):
     edges = []
 
     now = starting.copy()
     edges += get_rule_110_router_module_edges_north_pole(
-        bit, now, length_params)
+        bit, now, length_params, mask_input)
 
     now += length_params[0]*SOUTH
     edges += get_rule_110_router_module_edges_middle_pole(
-        bit, now, length_params)
+        bit, now, length_params, mask_input)
 
     now += length_params[0]*SOUTH
     edges += get_rule_110_router_module_edges_south_pole(
-        bit, now, length_params)
+        bit, now, length_params, mask_input)
 
     # middle pole
 
@@ -161,6 +251,9 @@ def rule_110_computer(bits):
     for i, b in enumerate(bits):
         edges += get_rule_110_router_module_edges(
             b, now+(3*i*length_params[0])*SOUTH, length_params)
+
+        edges += get_rule_110_router_module_edges(
+            b, now+(3*i*length_params[0])*SOUTH+46*WEST, length_params, mask_input=True)
 
     json_dict["input"]["edges"] = edges
     return json_dict
