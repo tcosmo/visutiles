@@ -230,7 +230,10 @@ def get_rule_110_router_module_edges(bit, starting, length_params,  mask_input=F
     return edges
 
 
-def rule_110_computer(bits):
+def rule_110_computer(bits, nb_iter):
+
+    nb_iter = int(nb_iter)
+
     json_dict = init_json_dict()
     edges = []
 
@@ -249,11 +252,9 @@ def rule_110_computer(bits):
     now = CENTER
 
     for i, b in enumerate(bits):
-        edges += get_rule_110_router_module_edges(
-            b, now+(3*i*length_params[0])*SOUTH, length_params)
-
-        edges += get_rule_110_router_module_edges(
-            b, now+(3*i*length_params[0])*SOUTH+46*WEST, length_params, mask_input=True)
+        for it in range(nb_iter):
+            edges += get_rule_110_router_module_edges(
+                b, now+(3*i*length_params[0])*SOUTH+it*46*WEST, length_params, mask_input=(it != 0))
 
     json_dict["input"]["edges"] = edges
     return json_dict
