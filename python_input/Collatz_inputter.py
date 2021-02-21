@@ -90,22 +90,22 @@ class ParityVector(object):
         return len(self.pv_string)
 
 
-def test_same_number():
-    import coreli
-    # What happens when the nd corner
-    # is initially set to same number
-    json_dict = init_json_dict()
+# def test_same_number():
+#     import coreli
+#     # What happens when the nd corner
+#     # is initially set to same number
+#     json_dict = init_json_dict()
 
-    edges = []
+#     edges = []
 
-    edges += get_edges_write_word_then_move(
-        string_to_colors("0"*0+coreli.int_to_binary(133)), EAST)
-    edges += get_edges_write_word_then_move(
-        string_to_colors("0"*0+coreli.base(133, 3), binary=False), SOUTH)
+#     edges += get_edges_write_word_then_move(
+#         string_to_colors("0"*0+coreli.int_to_binary(133)), EAST)
+#     edges += get_edges_write_word_then_move(
+#         string_to_colors("0"*0+coreli.base(133, 3), binary=False), SOUTH)
 
-    json_dict["input"]["edges"] = edges
+#     json_dict["input"]["edges"] = edges
 
-    return json_dict
+#     return json_dict
 
 
 def test_non_deterministic_corner():

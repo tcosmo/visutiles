@@ -232,6 +232,8 @@ def get_rule_110_router_module_edges(bit, starting, length_params,  mask_input=F
 
 def rule_110_computer(bits, nb_iter):
 
+    # y' = OR(AND(NOT(x),y),XOR(y,z))
+
     nb_iter = int(nb_iter)
 
     json_dict = init_json_dict()
