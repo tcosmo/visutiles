@@ -52,6 +52,8 @@ class World {
 
   Tileset& tileset;  // not const because of query memoization
 
+  std::string json_dumps();
+
   void reset() {
     edges.clear();
     spawned_tiles_pos.clear();

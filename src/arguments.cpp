@@ -89,12 +89,31 @@ void parseArguments(int argc, char *argv[], Arguments &arguments) {
     }
   }
 
-  // Collatz parity vector
-  if (option_exists(input, options[3])) {
+  bool trigger_help_page = true;
+
+  // STDIN
+  if (option_exists(input, options[OPTION_STDIN])) {
     arguments.inputType = STDIN;
-    return;
+    trigger_help_page = false;
   }
 
-  helpPage();
-  exit(0);
+  // OPTION_NO_GUI
+  if (option_exists(input, options[OPTION_NO_GUI])) {
+    arguments.no_gui = true;
+    trigger_help_page = false;
+  }
+
+  // OPTION_RUN_N_STEPS
+  if (option_exists(input, options[OPTION_RUN_N_STEPS])) {
+    std::string run_n_steps_str =
+        get_cmd_option(input, options[OPTION_RUN_N_STEPS]);
+
+    sscanf(run_n_steps_str.c_str(), "%zu", &arguments.run_n_steps);
+    trigger_help_page = false;
+  }
+
+  if (trigger_help_page) {
+    helpPage();
+    exit(0);
+  }
 }

@@ -163,6 +163,31 @@ def string_to_colors(binary_string, binary=True):
     return list(map(lambda x: ("bin" if binary else "ter", int(x)), binary_string))
 
 
+def forward_bin_ter(binary_string, ternary_string, padding=None):
+    json_dict = init_json_dict()
+    edges = []
+
+    if padding is not None:
+        padding = int(padding)
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors(binary_string[::-1]), WEST, len(ternary_string)*NORTH)
+
+    if padding is not None and len(binary_string) < padding:
+        edges += get_edges_write_word_then_move(
+            string_to_colors("0"*(padding-len(binary_string))), WEST, WEST*len(binary_string))
+
+    edges += get_edges_write_word_then_move(
+        string_to_colors(ternary_string[::-1], False), NORTH)
+
+    if padding is not None and len(ternary_string) < padding:
+        edges += get_edges_write_word_then_move(
+            string_to_colors("0"*(padding-len(ternary_string)), False), NORTH, NORTH*len(ternary_string))
+
+    json_dict["input"]["edges"] = edges
+    return json_dict
+
+
 def CRT(binary_string, ternary_string, padding=None):
     json_dict = init_json_dict()
     edges = []

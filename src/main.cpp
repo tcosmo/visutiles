@@ -32,19 +32,27 @@ int main(int argc, char** argv) {
   EdgeMap edges = input_factory.get_initial_configuration();
   w.set_input_edges(edges);
 
+  // World view
+  // TODO: move this font loader somewhere else
   sf::Font default_font;
-
-  if (!default_font.loadFromFile(DEFAULT_FONT)) {
+  if (!default_font.loadFromFile(DEFAULT_FONT))
     fatal_error_log("Could not load font `%s`! Abort.\n", DEFAULT_FONT);
+  WorldView w_view(tileset, w, default_font);
+  if (!arguments.no_gui) w_view.update();
+
+  for (size_t i = 0; i < arguments.run_n_steps; i += 1) {
+    w.update();
+    if (!arguments.no_gui) w_view.update();
   }
 
-  // World view
-  WorldView w_view(tileset, w, default_font);
-  w_view.update();
-
-  // Simulation engine
-  GraphicEngine engine(w, w_view, tileset, 1350, 900);
-  engine.run();
+  // Gui mode
+  if (!arguments.no_gui) {
+    // Graphic engine
+    GraphicEngine engine(w, w_view, tileset, 1350, 900);
+    engine.run();
+  } else {
+    printf("%s\n", w.json_dumps().c_str());
+  }
 
   return 0;
 }

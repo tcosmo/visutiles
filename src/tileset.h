@@ -45,6 +45,8 @@ class Tileset {
   Tileset(std::string json_file_path);
   ~Tileset();
 
+  std::string get_json_file_path() { return json_file_path; }
+
   // Return the set of possible edge colors and corresponding tile names
   // given a set of edge constraints
   PossibleEdgesColorsAndTilesNames Wang_query(

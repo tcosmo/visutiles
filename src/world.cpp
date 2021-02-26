@@ -1,6 +1,30 @@
 #include "world.h"
+#include "third_party/json11/json11.hpp"
 
 World::World(Tileset& tileset) : tileset(tileset), missmatching_edge_count(0) {}
+
+std::string World::json_dumps() {
+  std::vector<json11::Json> json_edges_vector;
+
+  for (const EdgePosAndColor& edge : edges) {
+    std::vector<json11::Json> json_edge_pos = {
+        json11::Json(std::array{
+            json11::Json(std::array{json11::Json(edge.pos.first.x),
+                                    json11::Json(edge.pos.first.y)}),
+            json11::Json(std::array{json11::Json(edge.pos.second.x),
+                                    json11::Json(edge.pos.second.y)})}),
+        json11::Json(std::array{json11::Json(edge.color.first),
+                                json11::Json(edge.color.second)})};
+    json_edges_vector.push_back(json_edge_pos);
+  }
+
+  std::map<std::string, json11::Json> json_dict;
+  json_dict["edges"] = json_edges_vector;
+
+  json_dict["tileset"] = tileset.get_json_file_path();
+
+  return json11::Json(json_dict).dump();
+}
 
 void World::print_edge(const EdgePosAndColor& edge) {
   printf("\t(%d,%d) (%d,%d) (%s,%d)\n", edge.pos.first.x, edge.pos.first.y,
