@@ -41,12 +41,14 @@ struct InputOption {
 };
 
 static const size_t DEFAULT_OPTION_COUNT = 3;
-static const size_t CUSTOM_OPTION_COUNT = 3;
-static const size_t OPTION_COUNT = DEFAULT_OPTION_COUNT + CUSTOM_OPTION_COUNT;
 
+static const size_t CUSTOM_OPTION_COUNT = 4;
 static const size_t OPTION_STDIN = 3;
 static const size_t OPTION_NO_GUI = 4;
 static const size_t OPTION_RUN_N_STEPS = 5;
+static const size_t OPTION_CHECK_EDGES = 6;
+
+static const size_t OPTION_COUNT = DEFAULT_OPTION_COUNT + CUSTOM_OPTION_COUNT;
 
 static InputOption options[OPTION_COUNT] = {
     // Default options
@@ -57,7 +59,8 @@ static InputOption options[OPTION_COUNT] = {
     // Custom options
     {"stdin", 'i', NULL, "Reads input (see `input_spec.md`) on stdin"},
     {"no-gui", 'G', NULL, "Launch the simulator with a gui"},
-    {"run-n-steps", 'n', NULL, "Runs the simulation for n steps"}};
+    {"run-n-steps", 'n', NULL, "Runs the simulation for n steps"},
+    {"partial-dump", 'p', NULL, "Dumps the content of some specific edges"}};
 
 static const char doc[] =
     "Welcome to VisuTiles: a Wang tile "
@@ -70,8 +73,10 @@ struct Arguments {
   std::string inputStr;
   bool no_gui;
   size_t run_n_steps;
+  bool partial_dump;
 
-  Arguments() : inputType(NONE), no_gui(false), run_n_steps(0) {}
+  Arguments()
+      : inputType(NONE), no_gui(false), run_n_steps(0), partial_dump(false) {}
 };
 
 void parseArguments(int argc, char *argv[], Arguments &arguments);

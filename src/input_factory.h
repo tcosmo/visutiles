@@ -14,13 +14,15 @@
 
 class InputFactory {
  public:
-  InputFactory(std::string input_json) : input_json(input_json) {
+  InputFactory(std::string input_json)
+      : input_json(input_json), json_parsed(false) {
     build_initial_configuration();
   }
 
   ~InputFactory() {}
 
   EdgeMap get_initial_configuration();
+  std::vector<OrderedPosCouple> get_edges_to_check();
 
   Tileset tileset;
 
@@ -31,4 +33,5 @@ class InputFactory {
   void build_initial_configuration();
   EdgeMap initial_configuration;
   json11::Json json_doc;
+  bool json_parsed;
 };

@@ -2,7 +2,7 @@ import sys
 import json
 from python_input.geometry import np, WEST, SOUTH, EAST, NORTH, CENTER
 from python_input.Collatz_inputter import get_edge, get_edge_v, init_json_dict, \
-    get_edges_write_word_then_move, string_to_colors
+    get_edges_write_word_then_move, string_to_colors, pos_to_serlist
 
 
 def get_rule_110_router_module_edges_north_pole(bit, starting, length_params, mask_input=False):
@@ -169,13 +169,15 @@ def get_rule_110_router_module_edges_middle_pole(bit, starting, length_params, m
     return edges
 
 
-def get_rule_110_router_module_edges_south_pole(bit, starting, length_params, mask_input=False):
+def get_rule_110_router_module_edges_south_pole(bit, starting, length_params, mask_input=False, edges_to_check=[]):
     edges = []
     now = starting.copy()
 
     if not mask_input:
         edges.append(get_edge_v(now, NORTH, ("ter", int(bit))))
         edges.append(get_edge_v(now+NORTH, NORTH, ("ter", int(bit))))
+
+    edges_to_check.append([pos_to_serlist(now), pos_to_serlist(now+NORTH)])
     edges += get_edges_write_word_then_move(
         string_to_colors("1" * length_params[1]), WEST, now)
 
@@ -210,7 +212,7 @@ def get_rule_110_router_module_edges_south_pole(bit, starting, length_params, ma
     return edges
 
 
-def get_rule_110_router_module_edges(bit, starting, length_params,  mask_input=False):
+def get_rule_110_router_module_edges(bit, starting, length_params,  mask_input=False, edges_to_check=[]):
     edges = []
 
     now = starting.copy()
@@ -223,15 +225,15 @@ def get_rule_110_router_module_edges(bit, starting, length_params,  mask_input=F
 
     now += length_params[0]*SOUTH
     edges += get_rule_110_router_module_edges_south_pole(
-        bit, now, length_params, mask_input)
+        bit, now, length_params, mask_input, edges_to_check)
 
     # middle pole
 
     return edges
 
 
-def rule_110_computer(bits, nb_iter):
-
+def rule_124_computer(bits, nb_iter):
+    # Rule 124 is the mirror of rule 110
     # y' = OR(AND(NOT(x),y),XOR(y,z))
 
     nb_iter = int(nb_iter)
@@ -253,12 +255,14 @@ def rule_110_computer(bits, nb_iter):
                      distance_between_input_and_first_exchanger, distance_between_the_two_middle_pole_input]
     now = CENTER
 
+    edges_to_check = []
     for i, b in enumerate(bits):
         for it in range(nb_iter):
             edges += get_rule_110_router_module_edges(
-                b, now+(3*i*length_params[0])*SOUTH+it*46*WEST, length_params, mask_input=(it != 0))
+                b, now+(3*i*length_params[0])*SOUTH+it*46*WEST, length_params, mask_input=(it != 0), edges_to_check=edges_to_check)
 
     json_dict["input"]["edges"] = edges
+    json_dict["input"]["edges_to_check"] = edges_to_check
     return json_dict
 
 

@@ -32,6 +32,9 @@ int main(int argc, char** argv) {
   EdgeMap edges = input_factory.get_initial_configuration();
   w.set_input_edges(edges);
 
+  if (arguments.partial_dump)
+    w.set_edges_pos_to_check(input_factory.get_edges_to_check());
+
   // World view
   // TODO: move this font loader somewhere else
   sf::Font default_font;
@@ -51,7 +54,10 @@ int main(int argc, char** argv) {
     GraphicEngine engine(w, w_view, tileset, 1350, 900);
     engine.run();
   } else {
-    printf("%s\n", w.json_dumps().c_str());
+    if (!arguments.partial_dump) {
+      printf("%s\n", w.json_dumps().c_str());
+    } else
+      printf("%s\n", w.json_dumps_check().c_str());
   }
 
   return 0;

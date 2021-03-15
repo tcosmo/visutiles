@@ -112,6 +112,12 @@ void parseArguments(int argc, char *argv[], Arguments &arguments) {
     trigger_help_page = false;
   }
 
+  // OPTION_CHECK_EDGES
+  if (option_exists(input, options[OPTION_CHECK_EDGES])) {
+    arguments.partial_dump = true;
+    trigger_help_page = false;
+  }
+
   if (trigger_help_page) {
     helpPage();
     exit(0);

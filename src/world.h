@@ -40,6 +40,8 @@ class World {
   ~World();
 
   void set_input_edges(EdgeMap p_edges);
+  void set_edges_pos_to_check(std::vector<OrderedPosCouple> edges_to_check);
+
   const EdgeMap& get_edges() { return edges; }
 
   void update();
@@ -53,6 +55,7 @@ class World {
   Tileset& tileset;  // not const because of query memoization
 
   std::string json_dumps();
+  std::string json_dumps_check();
 
   void reset() {
     edges.clear();
@@ -104,6 +107,9 @@ class World {
   PosSet dead_tiles_pos;
 
   size_t missmatching_edge_count;
+
+  // List of edges to give value of as output
+  std::vector<OrderedPosCouple> edges_to_check;
 
   std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE>
   get_edges_colors_at_tile_pos(const sf::Vector2i& tile_pos);

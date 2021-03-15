@@ -5,6 +5,8 @@ void InputFactory::build_initial_configuration() {
   std::string err;
   json_doc = json_doc.parse(input_json, err);
 
+  json_parsed = true;
+
   json11::Json::object json_dict = json_doc.object_items();
   std::string tileset_path = json_dict["tileset"].string_value();
 
@@ -47,4 +49,34 @@ void InputFactory::build_initial_configuration() {
 
 EdgeMap InputFactory::get_initial_configuration() {
   return initial_configuration;
+}
+
+std::vector<OrderedPosCouple> InputFactory::get_edges_to_check() {
+  std::vector<OrderedPosCouple> to_return;
+  if (!json_parsed) {
+    std::string err;
+    json_doc = json_doc.parse(input_json, err);
+    json_parsed = true;
+  }
+
+  json11::Json::object json_dict = json_doc.object_items();
+  json11::Json::object input_dict = json_dict["input"].object_items();
+  json11::Json::array edges_to_check =
+      input_dict["edges_to_check"].array_items();
+
+  for (const json11::Json& edge_desc : edges_to_check) {
+    json11::Json::array edge_pos = edge_desc.array_items();
+
+    std::array<sf::Vector2i, 2> vec_edge_pos;
+    size_t i = 0;
+    for (json11::Json pos : edge_pos) {
+      json11::Json coords = pos.array_items();
+      vec_edge_pos[i] = {coords[0].int_value(), coords[1].int_value()};
+      i += 1;
+    }
+
+    to_return.push_back(vec_edge_pos);
+  }
+
+  return to_return;
 }

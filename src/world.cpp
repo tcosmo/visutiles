@@ -3,6 +3,35 @@
 
 World::World(Tileset& tileset) : tileset(tileset), missmatching_edge_count(0) {}
 
+std::string World::json_dumps_check() {
+  std::vector<json11::Json> json_edges_check_vector;
+
+  for (const OrderedPosCouple& edge_to_check_pos : edges_to_check) {
+    EdgePosAndColor edge(edge_to_check_pos, ANY_EDGE_COLOR);
+    if (edges.find(edge_to_check_pos) != edges.end()) {
+      edge.color = edges[edge_to_check_pos];
+    }
+
+    std::vector<json11::Json> json_edge_pos = {
+        json11::Json(std::array{
+            json11::Json(std::array{json11::Json(edge.pos.first.x),
+                                    json11::Json(edge.pos.first.y)}),
+            json11::Json(std::array{json11::Json(edge.pos.second.x),
+                                    json11::Json(edge.pos.second.y)})}),
+        json11::Json(std::array{json11::Json(edge.color.first),
+                                json11::Json(edge.color.second)})};
+    json_edges_check_vector.push_back(json_edge_pos);
+  }
+
+  std::map<std::string, json11::Json> json_dict;
+  json_dict["input"] = std::map<std::string, json11::Json>(
+      {{"edges_to_check", json11::Json(json_edges_check_vector)}});
+
+  json_dict["tileset"] = tileset.get_json_file_path();
+
+  return json11::Json(json_dict).dump();
+}
+
 std::string World::json_dumps() {
   std::vector<json11::Json> json_edges_vector;
 
@@ -19,7 +48,8 @@ std::string World::json_dumps() {
   }
 
   std::map<std::string, json11::Json> json_dict;
-  json_dict["edges"] = json_edges_vector;
+  json_dict["input"] = std::map<std::string, json11::Json>(
+      {{"edges", json11::Json(json_edges_vector)}});
 
   json_dict["tileset"] = tileset.get_json_file_path();
 
@@ -43,6 +73,11 @@ void World::set_input_edges(EdgeMap p_edges) {
   for (const EdgePosAndColor& edge : input_edges) {
     add_edge_if_not_present(edge);
   }
+}
+
+void World::set_edges_pos_to_check(
+    std::vector<OrderedPosCouple> p_edges_to_check) {
+  edges_to_check = std::move(p_edges_to_check);
 }
 
 std::array<EdgeColor, SQUARE_GRID_NEIGHBORING_SIZE>

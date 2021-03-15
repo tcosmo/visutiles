@@ -125,6 +125,16 @@ def test_non_deterministic_corner():
     return json_dict
 
 
+def parity_vector_and_north_translate(pv_string, t):
+    pv = ParityVector(pv_string)
+    t = int(t)
+    json_dict = init_json_dict()
+    json_dict["input"]["edges"] = get_pv_edges(pv_string, CENTER)
+    json_dict["input"]["edges"] += get_pv_edges(
+        pv_string, CENTER+t*NORTH, full_of_zeros=True)
+    return json_dict
+
+
 def parity_vector_and_north_span_translate(pv_string):
     pv = ParityVector(pv_string)
     json_dict = init_json_dict()
@@ -384,6 +394,34 @@ def rule_110(three_bits):
     return json_dict
 
 
+def bin_ter_input_and_t(bin_ter_string):
+    # just messing around
+    json_dict = init_json_dict()
+    edges = []
+
+    t = bin_ter_string.count(
+        'a')+bin_ter_string.count('b')+bin_ter_string.count('c')
+
+    last_pos = None
+    curr_pos = CENTER.copy()
+    for i, c in enumerate(bin_ter_string):
+        last_pos = curr_pos.copy()
+        if c in ['0', '1']:
+            curr_pos += WEST
+            edges.append(get_edge(last_pos, curr_pos, ("bin", int(c))))
+            edges.append(get_edge(last_pos+t*NORTH,
+                                  curr_pos+t*NORTH, ("bin", int(0))))
+        else:
+            curr_pos += SOUTH
+            edges.append(get_edge(last_pos, curr_pos,
+                                  ("ter", ord(c)-ord("a"))))
+            edges.append(get_edge(last_pos+t*NORTH, curr_pos+t*NORTH,
+                                  ("ter", 0)))
+
+    json_dict["input"]["edges"] = edges
+    return json_dict
+
+
 def bin_ter_input(bin_ter_string):
     # just messing around
     json_dict = init_json_dict()
@@ -393,12 +431,13 @@ def bin_ter_input(bin_ter_string):
     curr_pos = CENTER.copy()
     for i, c in enumerate(bin_ter_string):
         last_pos = curr_pos.copy()
-        if i % 2 == 0:
+        if c in ['0', '1']:
             curr_pos += WEST
             edges.append(get_edge(last_pos, curr_pos, ("bin", int(c))))
         else:
             curr_pos += SOUTH
-            edges.append(get_edge(last_pos, curr_pos, ("ter", int(c))))
+            edges.append(get_edge(last_pos, curr_pos,
+                                  ("ter", ord(c)-ord("a"))))
 
     json_dict["input"]["edges"] = edges
     return json_dict
